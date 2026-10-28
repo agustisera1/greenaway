@@ -4,7 +4,7 @@ paths:
   - "lib/*/repository.ts"
 ---
 
-# Async / eventos (dimensión 5)
+# Async / eventos
 
 Criterios para auditar y construir procesamiento asíncrono con transactional outbox, un relay por
 polling y colas BullMQ sobre Redis. Las secciones de criterios no dependen del proyecto. Lo propio de

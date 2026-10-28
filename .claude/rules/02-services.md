@@ -12,7 +12,7 @@ paths:
   - "lib/apollo/**"
 ---
 
-# Services (dimensión 2)
+# Services
 
 Cómo se desarrolla, consume y audita un service. El ejemplo canónico es `reviews`. Auditar un service
 puede requerir leerlo completo.

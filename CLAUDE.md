@@ -45,7 +45,7 @@ de arreglar otra cosa.
 
 ## Reglas — `.claude/rules/`
 
-**Antes de modificar código, leé las reglas de `.claude/rules/` de las dimensiones que toca la tarea y alineá el cambio con ellas.**
+**Antes de modificar código, leé las reglas de `.claude/rules/` de las áreas que toca la tarea y alineá el cambio con ellas.**
 
 Un archivo por área. Las que tienen `paths:` se cargan solo al tocar archivos que matchean.
 

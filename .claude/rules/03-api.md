@@ -11,7 +11,7 @@ paths:
   - "codegen.ts"
 ---
 
-# Contrato de API (dimensión 3)
+# Contrato de API
 
 Criterios para auditar el contrato entre clientes y server en tres transportes: REST (incluye RPC tipo
 Server Actions), GraphQL y realtime (WebSocket/SSE). Las secciones de criterios no dependen del

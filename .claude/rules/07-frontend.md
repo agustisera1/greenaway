@@ -6,7 +6,7 @@ paths:
   - "lib/*/socket.ts"
 ---
 
-# Frontend / UI / UX (dimensión 7)
+# Frontend / UI / UX
 
 ## Arquitectura de componentes (UI)
 

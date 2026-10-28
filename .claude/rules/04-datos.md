@@ -9,7 +9,7 @@ paths:
   - "drizzle.config.ts"
 ---
 
-# Datos / persistencia (dimensión 4)
+# Datos / persistencia
 
 Criterios para auditar el modelo de datos en PostgreSQL y MongoDB: índices, constraints, tipos y
 dónde vive el schema. Las secciones de criterios no dependen del proyecto. Lo propio de este repo
