@@ -24,19 +24,22 @@ export function PageLayout({
   contentClassName?: string;
   children: ReactNode;
 }) {
+  const titleEl = (
+    <h1 className="font-heading text-3xl font-semibold tracking-tight text-balance md:text-4xl">
+      {title}
+    </h1>
+  );
+  // A `div`, not a `p`: a block-level `subtitle` (the loading `Skeleton`)
+  // closes a `p` early in the parser, which desyncs the server and client DOM.
+  const subtitleEl = subtitle && (
+    <div className="max-w-2xl text-sm text-muted-foreground text-pretty">
+      {subtitle}
+    </div>
+  );
   const heading = (
     <div className="flex flex-col gap-1">
-      <h1 className="font-heading text-3xl font-semibold tracking-tight text-balance md:text-4xl">
-        {title}
-      </h1>
-      {/* A `div`, not a `p`: `subtitle` takes any node, and a block-level one
-          (the loading state's `Skeleton`) closes a `p` early in the parser,
-          which desyncs the server and client DOM. */}
-      {subtitle && (
-        <div className="max-w-2xl text-sm text-muted-foreground text-pretty">
-          {subtitle}
-        </div>
-      )}
+      {titleEl}
+      {subtitleEl}
     </div>
   );
 
@@ -60,10 +63,16 @@ export function PageLayout({
             </div>
           ) : (
             <>
-              <div className="flex items-end justify-between gap-4">
-                {heading}
-                {actions && (
-                  <div className="flex shrink-0 gap-2">{actions}</div>
+              {/* Two rows so the title gets the full width; actions sit beside the subtitle. */}
+              <div className="flex flex-col gap-1">
+                {titleEl}
+                {(subtitleEl || actions) && (
+                  <div className="flex items-end justify-between gap-4">
+                    {subtitleEl || <span />}
+                    {actions && (
+                      <div className="flex shrink-0 gap-2">{actions}</div>
+                    )}
+                  </div>
                 )}
               </div>
               {toolbar}

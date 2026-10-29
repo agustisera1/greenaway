@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { ChartNoAxesColumn, Hash, Mail, User } from "lucide-react";
+import { Hash, Mail, User } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
 import { ROLE_DESCRIPTIONS, ROLE_LABELS, type Role } from "@/lib/auth/policy";
 import { initialsFrom } from "@/lib/shared/utils";
 import { PageLayout } from "@/components/common/page-layout";
 import { DetailColumns } from "@/components/common/detail-columns";
 import { Section } from "@/components/common/section";
-import { EmptyState } from "@/components/common/empty-state";
 import { Fact } from "@/components/common/fact";
 import { CopyButton } from "@/components/common/copy-button";
 import { InitialsAvatar } from "@/components/common/initials-avatar";
-import CreateListing from "@/components/listings/create-listing/create-listing";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -31,7 +29,6 @@ export default async function ProfilePage() {
     <PageLayout
       title="Profile"
       subtitle="Your account and the roles it carries."
-      actions={user.is_host && <CreateListing />}
     >
       <div className="flex flex-col gap-8">
         <Card>
@@ -91,19 +88,6 @@ export default async function ProfilePage() {
                 note="Quote this when reporting an issue."
               />
             </dl>
-          </Section>
-
-          <Section
-            title="Metrics"
-            subtitle="How your account is doing at a glance."
-            card
-          >
-            <EmptyState
-              className="py-10"
-              icon={<ChartNoAxesColumn />}
-              title="Coming soon"
-              description="Bookings, listings and review stats will show up here."
-            />
           </Section>
         </DetailColumns>
       </div>

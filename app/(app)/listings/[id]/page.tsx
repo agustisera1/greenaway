@@ -84,28 +84,28 @@ export default async function ListingDetailPage({
               </>
             )
           }
-          title={
-            <span className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              {listing.title}
-              <span className="flex shrink-0 items-center gap-1.5">
-                <Star className="size-5 fill-rating text-rating" />
-                <span className="text-base font-semibold tabular-nums">
-                  {listing.rating_avg ?? "New"}
-                </span>
-              </span>
-              <Badge
-                variant="outline"
-                className="uppercase tracking-widest text-2xs"
-              >
-                {listing.type}
-              </Badge>
-            </span>
-          }
+          title={listing.title}
           subtitle={
-            <span className="flex items-center gap-1.5">
-              <MapPin className="size-3.5" />
-              {listing.location?.city || "Location not specified"},{" "}
-              {listing.location?.country || "Country not specified"}
+            <span className="flex flex-col gap-2">
+              <span className="flex flex-wrap items-center gap-3 text-foreground">
+                <span className="flex shrink-0 items-center gap-1.5">
+                  <Star className="size-5 fill-rating text-rating" />
+                  <span className="text-base font-semibold tabular-nums">
+                    {listing.rating_avg ?? "New"}
+                  </span>
+                </span>
+                <Badge
+                  variant="outline"
+                  className="uppercase tracking-widest text-2xs"
+                >
+                  {listing.type}
+                </Badge>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <MapPin className="size-3.5" />
+                {listing.location?.city || "Location not specified"},{" "}
+                {listing.location?.country || "Country not specified"}
+              </span>
             </span>
           }
           contentClassName="flex flex-col gap-8"
