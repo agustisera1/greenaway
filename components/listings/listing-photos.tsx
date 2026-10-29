@@ -69,7 +69,7 @@ export function ListingPhotos({
             <div
               key={`${photo}-${i}`}
               className={cn(
-                "group relative overflow-hidden rounded-xl bg-muted",
+                "group relative isolate overflow-hidden rounded-xl bg-muted",
                 isLead
                   ? "aspect-video sm:col-span-2 sm:row-span-2 sm:aspect-auto"
                   : "hidden sm:block",
