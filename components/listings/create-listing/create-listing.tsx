@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
 import { createListing } from "@/lib/listings/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -99,14 +98,7 @@ export default function CreateListing({ className }: { className?: string }) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger
-        render={
-          <Button className={className}>
-            <Plus />
-            Add
-          </Button>
-        }
-      />
+      <DialogTrigger render={<Button className={className}>Add</Button>} />
 
       <WideDialogContent className="grid-rows-[auto_auto_minmax(0,1fr)]">
         <DialogHeader>

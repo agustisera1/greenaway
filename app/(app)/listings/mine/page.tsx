@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
 import { forbidden } from "next/navigation";
-import { Plus, SearchX } from "lucide-react";
+import { SearchX } from "lucide-react";
 import { Suspense } from "react";
 import { query } from "@/lib/apollo/client";
 import { GetListingsDocument } from "@/lib/apollo/__generated__/operations";
-import { parseListingFilters, type ListingSearchParams } from "@/lib/listings/validation";
+import {
+  parseListingFilters,
+  type ListingSearchParams,
+} from "@/lib/listings/validation";
 import { Listings } from "@/components/listings/listings";
 import CreateListing from "@/components/listings/create-listing/create-listing";
 import { Search } from "@/components/search/search";
@@ -60,7 +63,6 @@ export default async function MyListingsPage({
       ) : (
         <EmptyState
           className="py-16"
-          icon={<Plus />}
           title="No listings yet"
           description="Publish your first listing to start hosting."
           action={<CreateListing className="mt-2" />}
