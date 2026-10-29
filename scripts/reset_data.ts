@@ -2,11 +2,8 @@
 // `--dry-run` counts without touching anything; `--yes` skips the prompt.
 import { Pool } from "pg";
 import { MongoClient } from "mongodb";
-import {
-  DeleteObjectsCommand,
-  ListObjectsV2Command,
-  S3Client,
-} from "@aws-sdk/client-s3";
+import { DeleteObjectsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { s3 } from "@/lib/infra/s3";
 import * as readline from "readline/promises";
 
 // `users` is deliberately absent: wiping it would invalidate every logged-in
@@ -117,16 +114,6 @@ async function resetMongo(client: MongoClient) {
 // ---------------------------------------------------------------------------
 // S3
 // ---------------------------------------------------------------------------
-
-const s3 = new S3Client({
-  region: process.env.AWS_S3_REGION,
-  endpoint: process.env.AWS_S3_ENDPOINT,
-  forcePathStyle: true,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
 
 async function* listBucketKeys(Bucket: string) {
   let ContinuationToken: string | undefined;

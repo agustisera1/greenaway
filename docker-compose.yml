@@ -56,7 +56,7 @@ services:
       RUSTFS_SECRET_KEY: ${AWS_SECRET_ACCESS_KEY:?set AWS_SECRET_ACCESS_KEY in .env.local}
       RUSTFS_CONSOLE_ENABLE: "true"
     ports:
-      - "${S3_PORT:-9000}:9000"
+      - "9000:9000"
       - "127.0.0.1:${S3_CONSOLE_PORT:-9001}:9001"
     volumes:
       - s3-data:/data

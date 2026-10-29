@@ -22,11 +22,13 @@ function publicBaseUrl(Bucket: string) {
   return `${endpoint}/${Bucket}/`;
 }
 
-// The object key is the URL path after the bucket's public base (`listings/<id>/<uuid>.jpeg`).
+// The object key is the URL after the bucket's public base (`listings/<id>/<uuid>.jpeg`).
+// URLs outside the bucket (seed mocks) have no object to delete.
 export async function deleteListingObject(url: string) {
   const Bucket = process.env.AWS_LISTINGS_BUCKET!;
-  const basePath = new URL(publicBaseUrl(Bucket)).pathname;
-  const Key = decodeURIComponent(new URL(url).pathname).slice(basePath.length);
+  const base = publicBaseUrl(Bucket);
+  if (!url.startsWith(base)) return;
+  const Key = decodeURIComponent(url.slice(base.length));
 
   await s3.send(new DeleteObjectCommand({ Bucket, Key }));
 }

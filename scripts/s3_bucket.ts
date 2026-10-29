@@ -2,25 +2,14 @@
 import {
   CreateBucketCommand,
   PutBucketPolicyCommand,
-  S3Client,
   S3ServiceException,
 } from "@aws-sdk/client-s3";
+import { s3 } from "@/lib/infra/s3";
 
 async function main() {
-  const endpoint = process.env.AWS_S3_ENDPOINT;
   const Bucket = process.env.AWS_LISTINGS_BUCKET;
-  if (!endpoint) throw new Error("Missing AWS_S3_ENDPOINT");
+  if (!process.env.AWS_S3_ENDPOINT) throw new Error("Missing AWS_S3_ENDPOINT");
   if (!Bucket) throw new Error("Missing AWS_LISTINGS_BUCKET");
-
-  const s3 = new S3Client({
-    region: process.env.AWS_S3_REGION,
-    endpoint,
-    forcePathStyle: true,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-    },
-  });
 
   try {
     await s3.send(new CreateBucketCommand({ Bucket }));
