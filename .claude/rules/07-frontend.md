@@ -32,7 +32,7 @@ Todo color, radio y tamaño de texto sale de un token en `app/globals.css` (`@th
 | Superficies | `background`, `card`, `popover`, `muted`, `sidebar` | Fondos, por altitud |
 | Sobre imagen | `overlay`, `overlay-foreground` | Scrim y texto encima de una foto (badge sobre la portada, degradado del hero). Único sin par light/dark a propósito: va sobre la imagen, no sobre una superficie de la página |
 | Texto y bordes | `foreground`, `muted-foreground`, `border`, `input`, `ring` | Texto, separadores, foco |
-| Semánticos | `primary`, `secondary`, `accent`, `success`, `destructive`, `rating` | Acción, énfasis, estado. `rating` = amarillo de estrellas |
+| Semánticos | `primary`, `secondary`, `accent`, `success`, `destructive`, `warning`, `rating` | Acción, énfasis, estado. `rating` = amarillo de estrellas |
 | Radios | `--radius` → `radius-sm … radius-4xl` | Todo derivado de un único radio base |
 | Tipografía | `font-sans` / `font-heading` / `font-mono`; escala `text-2xs …` | `text-2xs` (10px) para meta y badges; el resto, la escala de Tailwind |
 

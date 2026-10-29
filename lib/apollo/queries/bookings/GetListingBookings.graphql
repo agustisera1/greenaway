@@ -1,6 +1,8 @@
 query GetListingBookings($id: ID!) {
   listing(id: $id) {
     id
+    title
+    host_id
     bookings {
       id
       created_at

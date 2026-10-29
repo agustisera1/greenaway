@@ -42,6 +42,13 @@ export const cancelBookingSchema = z.object({
 
 export type CancelBookingInput = z.infer<typeof cancelBookingSchema>;
 
+// The guest loses a confirmed stay, so a host cancelling has to say why.
+export const HOST_CANCEL_REASON_REQUIRED = "Let the guest know why you're cancelling";
+
+export const hostCancelReasonSchema = z.object({
+  reason: z.string().trim().min(1, HOST_CANCEL_REASON_REQUIRED).max(256, "Keep it under 256 characters"),
+});
+
 export const manageBookingSchema = z.object({
   bookingId: bookingIdSchema,
   hostMessage: statusReasonSchema,

@@ -2,9 +2,13 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { CircleXIcon } from "lucide-react";
+import { CircleXIcon, Hand } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import {
+  HostCancelBookingDialog,
+  warningButtonClass,
+} from "./host-cancel-booking-dialog";
 import { cancelBooking } from "@/lib/bookings/actions";
 import { formatPrice } from "@/lib/shared/utils";
 import {
@@ -25,7 +29,7 @@ export function CancelBookingButton({
   bookingId: string;
   booking: CancellableBooking;
   actor: CancelActor;
-  variant?: "icon" | "button";
+  variant?: "icon" | "button" | "compact";
 }) {
   // Captured once at mount: reading the clock during render is impure.
   const [now] = useState(() => new Date());
@@ -61,6 +65,11 @@ export function CancelBookingButton({
         <CircleXIcon />
         Cancel booking
       </Button>
+    ) : variant === "compact" ? (
+      <Button variant="ghost" className={warningButtonClass}>
+        <Hand />
+        Cancel
+      </Button>
     ) : (
       <Button
         variant="ghost"
@@ -70,6 +79,15 @@ export function CancelBookingButton({
         <CircleXIcon />
         <span className="sr-only">Cancel booking</span>
       </Button>
+    );
+
+  if (actor === "host")
+    return (
+      <HostCancelBookingDialog
+        bookingId={bookingId}
+        trigger={trigger}
+        description={description}
+      />
     );
 
   return (

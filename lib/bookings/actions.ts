@@ -12,6 +12,7 @@ import type { Booking } from "./types";
 import {
   cancelBookingSchema,
   createBookingSchema,
+  HOST_CANCEL_REASON_REQUIRED,
   manageBookingSchema,
   type CancelBookingInput,
   type CreateBookingInput,
@@ -120,6 +121,8 @@ export async function cancelBooking(
     );
     if (!actor)
       return { ok: false, error: "You can only cancel your own bookings", code: "FORBIDDEN" };
+    if (actor === "host" && !reason)
+      return { ok: false, error: HOST_CANCEL_REASON_REQUIRED, code: "VALIDATION" };
 
     const now = new Date();
     const check = canCancel(booking, actor, now);

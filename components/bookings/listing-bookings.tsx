@@ -1,79 +1,23 @@
 import { use } from "react";
-import { CalendarRange, Users } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import type { GetListingBookingsQuery } from "@/lib/apollo/__generated__/operations";
-import { formatDateRange, calcNights, parseTs } from "@/lib/shared/dates";
-import { formatPrice, bookingStatusVariant } from "@/lib/shared/utils";
+import Link from "next/link";
+import { CalendarRange } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/common/empty-state";
-import { ManageBookingActions } from "./manage-booking-actions";
-import { CancelBookingButton } from "./cancel-booking-button";
+import { cn } from "@/lib/shared/utils";
+import { HostBookingCard, type HostBooking } from "./host-booking-card";
+import { sortByProximity } from "./listing-bookings-model";
 
-type HostBooking = NonNullable<
-  NonNullable<GetListingBookingsQuery["listing"]>["bookings"]
->[number];
-
-function BookingCard({ booking }: { booking: HostBooking }) {
-  const nights = calcNights(booking.start_date, booking.end_date);
-  const isPending = booking.status === "pending";
-
-  return (
-    <li>
-      <Card className="p-0">
-        <CardContent className="flex flex-col gap-3 p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-1.5 text-sm font-medium">
-              <CalendarRange className="size-3.5 shrink-0 text-muted-foreground" />
-              <span>
-                {formatDateRange(booking.start_date, booking.end_date)}
-              </span>
-            </div>
-            <Badge
-              variant={bookingStatusVariant[booking.status]}
-              className="shrink-0 capitalize"
-            >
-              {booking.status}
-            </Badge>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Users className="size-3.5 shrink-0" />
-            <span>
-              {nights} night{nights !== 1 ? "s" : ""} · {booking.guests} guest
-              {booking.guests !== 1 ? "s" : ""}
-            </span>
-          </div>
-
-          {booking.status_reason && (
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              “{booking.status_reason}”
-            </p>
-          )}
-
-          <div className="mt-1 flex items-center justify-between gap-2 border-t pt-3">
-            <span className="text-base font-semibold tabular-nums">
-              {formatPrice(booking.total_price)}
-            </span>
-            {isPending ? (
-              <ManageBookingActions bookingId={booking.id} />
-            ) : (
-              <CancelBookingButton
-                bookingId={booking.id}
-                actor="host"
-                booking={booking}
-              />
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </li>
-  );
-}
-
+// Without `limit` it's the full page: every booking, detailed, in a grid.
 export function ListingBookings({
   bookingsPromise,
+  listingId,
+  now,
+  limit,
 }: {
   bookingsPromise: Promise<HostBooking[] | null>;
+  listingId: string;
+  now: Date;
+  limit?: number;
 }) {
   const bookings = use(bookingsPromise);
 
@@ -96,22 +40,36 @@ export function ListingBookings({
     );
   }
 
-  // Pending first (they need the host's action), then soonest start date.
-  const sorted = [...bookings].sort((a, b) => {
-    const aPending = a.status === "pending" ? 0 : 1;
-    const bPending = b.status === "pending" ? 0 : 1;
-    if (aPending !== bPending) return aPending - bPending;
-    return (
-      (parseTs(a.start_date)?.getTime() ?? 0) -
-      (parseTs(b.start_date)?.getTime() ?? 0)
-    );
-  });
+  const detailed = limit === undefined;
+  const sorted = sortByProximity(bookings, now.getTime());
+  const shown = detailed ? sorted : sorted.slice(0, limit);
 
   return (
-    <ul className="flex flex-col gap-3">
-      {sorted.map((booking) => (
-        <BookingCard key={booking.id} booking={booking} />
-      ))}
-    </ul>
+    <div className="flex flex-col gap-3">
+      <ul
+        className={cn(
+          "grid gap-3",
+          detailed && "sm:grid-cols-2 xl:grid-cols-3",
+        )}
+      >
+        {shown.map((booking) => (
+          <HostBookingCard
+            key={booking.id}
+            booking={booking}
+            detailed={detailed}
+          />
+        ))}
+      </ul>
+      {shown.length < sorted.length && (
+        <Button
+          variant="outline"
+          className="w-full"
+          nativeButton={false}
+          render={<Link href={`/listings/${listingId}/bookings`} />}
+        >
+          Review all reservations
+        </Button>
+      )}
+    </div>
   );
 }

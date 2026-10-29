@@ -39,6 +39,7 @@ export default async function ListingDetailPage({
   if (!listing) notFound();
 
   const currentUser = await getCurrentUser();
+  const now = new Date();
   const isHostMode =
     !!currentUser?.is_host && currentUser.id === listing.host_id;
 
@@ -151,7 +152,12 @@ export default async function ListingDetailPage({
                 title="Bookings"
                 subtitle="Reservations guests made for this listing"
               >
-                <ListingBookings bookingsPromise={bookingsPromise} />
+                <ListingBookings
+                  bookingsPromise={bookingsPromise}
+                  listingId={listing.id}
+                  now={now}
+                  limit={2}
+                />
               </Section>
             )}
 
