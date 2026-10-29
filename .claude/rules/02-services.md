@@ -14,8 +14,7 @@ paths:
 
 # Services
 
-Cómo se desarrolla, consume y audita un service. El ejemplo canónico es `reviews`. Auditar un service
-puede requerir leerlo completo.
+Cómo se desarrolla, consume y revisa un service. El ejemplo canónico es `reviews`.
 
 ## El patrón
 
@@ -418,9 +417,11 @@ import { replyToReview } from "@/lib/reviews/actions";
 import * as reviewsRepo from "@/lib/reviews/repository";
 ```
 
-## Checklist de auditoría
+## Checklist
 
-Lo que el ejemplo cumple sin decirlo explícitamente:
+Lo que el ejemplo cumple sin decirlo explícitamente. Se aplica solo a lo que cambió en la tarea, antes
+de reportarla: lo que el cambio no cumple se corrige sin reportarlo; lo que ya estaba mal fuera del
+cambio va como "para otro branch: X".
 
 - **No existen `lib/services/`, `lib/repositories/` ni `lib/types/`.** Verificación: `ls` de esas rutas falla.
 - **`types.ts`, `validation.ts` y `policy.ts` no importan de infra, Next ni del shell del service.** Verificación: sus imports no incluyen `@/lib/infra`, `next/`, `./repository`, `./queries` ni `./actions` (salvo `import type` de `./tables`).

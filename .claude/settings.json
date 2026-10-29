@@ -18,6 +18,12 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-reply-length.mjs\""
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-types-lint.mjs\"",
+            "statusMessage": "Running tsc and lint…",
+            "timeout": 180
           }
         ]
       }

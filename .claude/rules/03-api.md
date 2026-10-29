@@ -13,13 +13,15 @@ paths:
 
 # Contrato de API
 
-Criterios para auditar el contrato entre clientes y server en tres transportes: REST (incluye RPC tipo
-Server Actions), GraphQL y realtime (WebSocket/SSE). Las secciones de criterios no dependen del
-proyecto. Lo propio de este repo está al final, en **En este repo**.
+Criterios para construir y revisar el contrato entre clientes y server en tres transportes: REST
+(incluye RPC tipo Server Actions), GraphQL y realtime (WebSocket/SSE). Las secciones de criterios no
+dependen del proyecto. Lo propio de este repo está al final, en **En este repo**.
 
-**Cómo se usa:** cada criterio es **Base** (se audita siempre) o **Condicional** (se audita solo si
-se cumple su "Aplica cuando"). En el informe, un condicional que no aplica se lista con el motivo
-concreto del proyecto, para que la omisión sea una decisión y no un olvido.
+**Cómo se usa:** los criterios se aplican solo a lo que cambió en la tarea, antes de reportarla. Cada
+uno es **Base** (se cumple siempre) o **Condicional** (solo si se cumple su "Aplica cuando"); un
+condicional se descarta con un motivo concreto del proyecto, para que la omisión sea una decisión y
+no un olvido. Lo que el cambio no cumple se corrige sin reportarlo; lo que ya estaba mal fuera del
+cambio va como "para otro branch: X".
 
 Los ejemplos usan TypeScript. `fail(code, msg)` abrevia `{ ok: false, code, error: msg }`.
 
