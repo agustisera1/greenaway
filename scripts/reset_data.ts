@@ -120,6 +120,8 @@ async function resetMongo(client: MongoClient) {
 
 const s3 = new S3Client({
   region: process.env.AWS_S3_REGION,
+  endpoint: process.env.AWS_S3_ENDPOINT,
+  forcePathStyle: true,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
@@ -144,10 +146,8 @@ async function* listBucketKeys(Bucket: string) {
   } while (ContinuationToken);
 }
 
-// `null` means the bucket could not be read at all — almost always a missing
-// `s3:ListBucket` (a bucket-level action, granted on the bucket ARN rather than
-// on `.../*`). The databases are the point of this script, so S3 degrades to a
-// warning instead of taking the whole reset down with it.
+// `null` means the bucket could not be read (container down, no bucket yet). The databases are
+// the point of this script, so S3 degrades to a warning instead of taking the reset down.
 async function countS3Objects(Bucket: string): Promise<number | null> {
   try {
     let total = 0;

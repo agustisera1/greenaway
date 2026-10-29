@@ -28,6 +28,27 @@ pnpm infra:reset   # borra contenedores y volúmenes, y vuelve a infra:up
 Los comandos `infra:*` son scripts de `package.json` sobre `docker compose --env-file .env.local`;
 `infra:up` agrega `--wait` (espera los healthchecks) y después corre `db:setup` y `db:seed`.
 
+### Storage (S3)
+
+Las fotos de los listings vivían en un bucket real de AWS, pensado para desplegar la app. Esa
+decisión se revirtió: el proyecto corre solo local, como portfolio. Por eso S3 pasó a Docker como
+el resto de la infra, y se borraron el bucket y el usuario de IAM. La app sigue usando el SDK de
+AWS: el emulador habla la misma API.
+
+El servicio `s3` emula S3 con [RustFS](https://docs.rustfs.com) en `AWS_S3_ENDPOINT`
+(`http://localhost:9000`), y su consola queda en `http://localhost:9001` (usuario y clave:
+`AWS_ACCESS_KEY_ID` y `AWS_SECRET_ACCESS_KEY`). Cada foto queda en
+`http://localhost:9000/<bucket>/listings/<id>/<uuid>.<ext>`. `db:bucket` (parte de `db:setup`) crea
+el bucket con lectura pública por objeto, sin listado.
+
+Para desplegar habría que volver a un S3 real: crear un bucket con lectura pública por objeto,
+quitar `forcePathStyle` y `dangerouslyAllowLocalIP`, y armar las URLs con el host del bucket.
+
+**`dangerouslyAllowLocalIP` en `next.config.ts`:** el optimizador de `next/image` rechaza por defecto
+las imágenes que resuelven a una IP privada, para que nadie lo use para pedir URLs de la red interna
+(SSRF). El emulador está en `localhost`, así que sin esta opción ninguna foto se ve. El riesgo queda
+acotado porque `remotePatterns` solo admite `<AWS_S3_ENDPOINT>/<bucket>/` y la app no se despliega.
+
 ### Puertos ocupados
 
 Los contenedores publican los puertos de `.env.local` (`PGPORT`, `REDIS_PORT`) y `27017` para Mongo.
@@ -43,6 +64,11 @@ contenedor de otro compose:
   `.env.local` y el mismo puerto en `MONGODB_URI`.
 
 Para ver quién ocupa un puerto: `netstat -ano | findstr :5433` (Windows) o `lsof -i :5433`.
+
+**Sin error también puede pasar:** si el servicio local escucha solo en `127.0.0.1`, Docker publica
+igual y `infra:up` no falla, pero la app se conecta al servicio local, porque gana la dirección más
+específica. Si el `netstat` muestra otro proceso además de `com.docker.backend`/`wslrelay`, hay que
+detenerlo.
 
 ## Orden
 
@@ -113,4 +139,4 @@ una misma reserva y de su chat.
 
 `db:reset` borra datos, no schema: `bookings`, `reviews`, `outbox` y `processed_events` en Postgres
 (los `users` quedan), las colecciones de Mongo con `deleteMany` (los índices quedan) y el bucket de
-S3. Si las credenciales no pueden listar el bucket (`s3:ListBucket`), S3 se saltea con un aviso.
+S3. Si el bucket no se puede leer (contenedor caído o bucket sin crear), S3 se saltea con un aviso.

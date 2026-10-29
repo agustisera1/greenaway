@@ -1,4 +1,4 @@
-# Local infra for the app and greenaway-worker. Credentials and ports come from .env.local:
+# Local infra for the app and greenaway-worker (S3 included, emulated by RustFS). Credentials and ports come from .env.local:
 # `pnpm infra:up` brings it up healthy with schema and seed (db/README.md).
 name: greenaway
 
@@ -49,6 +49,23 @@ services:
       timeout: 3s
       retries: 30
 
+  s3:
+    image: rustfs/rustfs:1.0.4
+    environment:
+      RUSTFS_ACCESS_KEY: ${AWS_ACCESS_KEY_ID:?set AWS_ACCESS_KEY_ID in .env.local}
+      RUSTFS_SECRET_KEY: ${AWS_SECRET_ACCESS_KEY:?set AWS_SECRET_ACCESS_KEY in .env.local}
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports:
+      - "${S3_PORT:-9000}:9000"
+      - "127.0.0.1:${S3_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - s3-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:9000/health"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
   mongo-express:
     image: mongo-express:latest
     environment:
@@ -63,3 +80,4 @@ services:
 volumes:
   postgres-data:
   mongo-data:
+  s3-data:

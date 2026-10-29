@@ -5,22 +5,28 @@ import {
 } from "@aws-sdk/client-s3";
 import { normalizeListingPhoto } from "@/lib/infra/images";
 
+// The S3 emulator from docker-compose only resolves path-style URLs (`<endpoint>/<bucket>/<key>`).
+const endpoint = process.env.AWS_S3_ENDPOINT!;
+
 export const s3 = new S3Client({
   region: process.env.AWS_S3_REGION,
+  endpoint,
+  forcePathStyle: true,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
 });
 
-/**
- * Deletes a listing photo from S3 given its public URL. The object key is the
- * URL pathname (e.g. `listings/<id>/<uuid>.jpeg`), so we don't need to know the
- * bucket/region layout here — it's whatever the upload route wrote.
- */
+function publicBaseUrl(Bucket: string) {
+  return `${endpoint}/${Bucket}/`;
+}
+
+// The object key is the URL path after the bucket's public base (`listings/<id>/<uuid>.jpeg`).
 export async function deleteListingObject(url: string) {
-  const Bucket = process.env.AWS_LISTINGS_BUCKET;
-  const Key = decodeURIComponent(new URL(url).pathname).replace(/^\//, "");
+  const Bucket = process.env.AWS_LISTINGS_BUCKET!;
+  const basePath = new URL(publicBaseUrl(Bucket)).pathname;
+  const Key = decodeURIComponent(new URL(url).pathname).slice(basePath.length);
 
   await s3.send(new DeleteObjectCommand({ Bucket, Key }));
 }
@@ -30,8 +36,7 @@ export async function addListingObject(
   listingId: string,
 ): Promise<string | null> {
   try {
-    const Bucket = process.env.AWS_LISTINGS_BUCKET;
-    const region = process.env.AWS_S3_REGION;
+    const Bucket = process.env.AWS_LISTINGS_BUCKET!;
     const randId = crypto.randomUUID();
     const { body, contentType, extension } = await normalizeListingPhoto(file);
     const Key = `listings/${listingId}/${randId}.${extension}`;
@@ -47,7 +52,7 @@ export async function addListingObject(
     });
 
     await s3.send(insertCmd);
-    return `https://${Bucket}.s3.${region}.amazonaws.com/${Key}`;
+    return `${publicBaseUrl(Bucket)}${Key}`;
   } catch (error) {
     console.error("[addListingObject]", error);
     return null;
