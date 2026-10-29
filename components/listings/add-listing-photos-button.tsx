@@ -17,11 +17,14 @@ import { editListing } from "@/lib/listings/actions";
 type AddListingPhotosButtonProps = {
   listingId: string;
   photos?: string[];
+  // `tile` fills a slot of the photo carousel, sized by its parent.
+  variant?: "button" | "tile";
 };
 
 export function AddListingPhotosButton({
   listingId,
   photos: existingPhotos = [],
+  variant = "button",
 }: AddListingPhotosButtonProps) {
   const [open, setOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -77,10 +80,17 @@ export function AddListingPhotosButton({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>
-        <ImagePlus className="size-4" />
-        Add photos
-      </DialogTrigger>
+      {variant === "tile" ? (
+        <DialogTrigger className="flex size-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-input text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring">
+          <ImagePlus className="size-6" />
+          Add photos
+        </DialogTrigger>
+      ) : (
+        <DialogTrigger render={<Button variant="outline" size="sm" />}>
+          <ImagePlus className="size-4" />
+          Add photos
+        </DialogTrigger>
+      )}
 
       <DialogContent size="lg">
         <DialogHeader>

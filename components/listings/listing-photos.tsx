@@ -16,7 +16,11 @@ import { AddListingPhotosButton } from "@/components/listings/add-listing-photos
 import { DeleteListingPhotoButton } from "@/components/listings/delete-listing-photo-button";
 import { cn } from "@/lib/shared/utils";
 
-const GRID_TILES = 5;
+// Spacing and sizes from the shadcn Carousel docs: two slides per view, three on desktop.
+const SLIDE_CLASS = "basis-1/2 pl-2 lg:basis-1/3";
+// The arrows sit on top of photos, so they take the overlay scrim to stay readable.
+const ARROW_CLASS =
+  "bg-overlay/60 text-overlay-foreground hover:bg-overlay/80 hover:text-overlay-foreground dark:hover:bg-overlay/80 disabled:opacity-0 cursor-pointer";
 
 type ListingPhotosProps = {
   photos: string[];
@@ -51,77 +55,55 @@ export function ListingPhotos({
     );
   }
 
-  const tiles = photos.slice(0, GRID_TILES);
-  const hidden = photos.length - tiles.length;
-
   return (
     <div className="flex flex-col gap-3">
-      <div
-        className={cn(
-          "grid gap-2 sm:h-96",
-          tiles.length > 1 && "sm:grid-cols-4 sm:grid-rows-2",
-        )}
-      >
-        {tiles.map((photo, i) => {
-          const isLead = i === 0;
-          const showMore = hidden > 0 && i === tiles.length - 1;
-          return (
-            <div
-              key={`${photo}-${i}`}
-              className={cn(
-                "group relative isolate overflow-hidden rounded-xl bg-muted",
-                isLead
-                  ? "aspect-video sm:col-span-2 sm:row-span-2 sm:aspect-auto"
-                  : "hidden sm:block",
-              )}
-            >
-              <button
-                type="button"
-                onClick={() => setOpenAt(i)}
-                aria-label={`Open photo ${i + 1} of ${photos.length}`}
-                className="block size-full"
-              >
-                <Image
-                  src={photo}
-                  alt={`${title} photo ${i + 1}`}
-                  fill
-                  priority={isLead}
-                  sizes={isLead ? "(min-width: 640px) 50vw, 100vw" : "25vw"}
-                  className="object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-105"
-                />
-                {showMore && (
-                  <span className="absolute inset-0 flex items-center justify-center bg-overlay/50 text-lg font-semibold text-overlay-foreground">
-                    +{hidden}
-                  </span>
+      <Carousel aria-label={`${title} photos`}>
+        <CarouselContent className="-ml-2">
+          {photos.map((photo, i) => (
+            <CarouselItem key={`${photo}-${i}`} className={SLIDE_CLASS}>
+              <div className="group relative isolate aspect-4/3 overflow-hidden rounded-xl bg-muted">
+                <button
+                  type="button"
+                  onClick={() => setOpenAt(i)}
+                  aria-label={`Open photo ${i + 1} of ${photos.length}`}
+                  className="block size-full cursor-pointer"
+                >
+                  <Image
+                    src={photo}
+                    alt={`${title} photo ${i + 1}`}
+                    fill
+                    priority={i === 0}
+                    sizes="(min-width: 1024px) 33vw, 50vw"
+                    className="object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-102"
+                  />
+                </button>
+                {isHostMode && (
+                  <DeleteListingPhotoButton
+                    listingId={listingId}
+                    photoUrl={photo}
+                  />
                 )}
-              </button>
-              {isHostMode && (
-                <DeleteListingPhotoButton
+              </div>
+            </CarouselItem>
+          ))}
+          {isHostMode && (
+            <CarouselItem className={SLIDE_CLASS}>
+              <div className="aspect-4/3">
+                <AddListingPhotosButton
                   listingId={listingId}
-                  photoUrl={photo}
+                  photos={photos}
+                  variant="tile"
                 />
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="flex items-center justify-between gap-3">
-        {photos.length > 1 && (
-          <button
-            type="button"
-            onClick={() => setOpenAt(0)}
-            className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-          >
-            Show all {photos.length} photos
-          </button>
-        )}
-        {isHostMode && (
-          <span className="ml-auto">
-            <AddListingPhotosButton listingId={listingId} photos={photos} />
-          </span>
-        )}
-      </div>
+              </div>
+            </CarouselItem>
+          )}
+        </CarouselContent>
+        <CarouselPrevious
+          variant="ghost"
+          className={cn("left-3", ARROW_CLASS)}
+        />
+        <CarouselNext variant="ghost" className={cn("right-3", ARROW_CLASS)} />
+      </Carousel>
 
       <Dialog
         open={openAt !== null}
@@ -151,8 +133,14 @@ export function ListingPhotos({
               </CarouselContent>
               {photos.length > 1 && (
                 <>
-                  <CarouselPrevious className="left-3" />
-                  <CarouselNext className="right-3" />
+                  <CarouselPrevious
+                    variant="ghost"
+                    className={cn("left-3", ARROW_CLASS)}
+                  />
+                  <CarouselNext
+                    variant="ghost"
+                    className={cn("right-3", ARROW_CLASS)}
+                  />
                 </>
               )}
             </Carousel>
