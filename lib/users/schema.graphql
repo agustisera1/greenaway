@@ -6,4 +6,5 @@ type UserSummary {
 
 extend type Booking {
   host: UserSummary
+  guest: UserSummary
 }

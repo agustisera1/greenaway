@@ -30,6 +30,7 @@ export type Booking = {
   cancelled_by?: Maybe<BookingParty>;
   created_at: Scalars['DateTime']['output'];
   end_date: Scalars['DateTime']['output'];
+  guest?: Maybe<UserSummary>;
   guests: Scalars['Int']['output'];
   host?: Maybe<UserSummary>;
   id: Scalars['ID']['output'];
@@ -356,6 +357,7 @@ export type BookingResolvers<ContextType = ApolloContext, ParentType extends Res
   cancelled_by?: Resolver<Maybe<ResolversTypes['BookingParty']>, ParentType, ContextType>;
   created_at?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   end_date?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  guest?: Resolver<Maybe<ResolversTypes['UserSummary']>, ParentType, ContextType>;
   guests?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   host?: Resolver<Maybe<ResolversTypes['UserSummary']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;

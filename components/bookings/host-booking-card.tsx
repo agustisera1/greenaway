@@ -1,11 +1,14 @@
-import { CalendarRange, LogIn, LogOut, Moon, Users } from "lucide-react";
+import Link from "next/link";
+import { CalendarRange, LogIn, LogOut, MessageSquare, Moon, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Fact } from "@/components/common/fact";
+import { InitialsAvatar } from "@/components/common/initials-avatar";
 import type { GetListingBookingsQuery } from "@/lib/apollo/__generated__/operations";
 import { formatDate, formatDateRange, calcNights } from "@/lib/shared/dates";
-import { formatPrice, bookingStatusVariant } from "@/lib/shared/utils";
+import { formatPrice, bookingStatusVariant, initialsFrom } from "@/lib/shared/utils";
 import { ManageBookingActions } from "./manage-booking-actions";
 import { CancelBookingButton } from "./cancel-booking-button";
 
@@ -24,6 +27,7 @@ export function HostBookingCard({
   const nights = calcNights(booking.start_date, booking.end_date);
   const isPending = booking.status === "pending";
   const isCancelled = booking.status === "cancelled";
+  const guestName = booking.guest?.name ?? "Guest";
 
   return (
     <li>
@@ -42,6 +46,27 @@ export function HostBookingCard({
             >
               {booking.status}
             </Badge>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <InitialsAvatar initials={initialsFrom(guestName)} />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-sm font-medium">{guestName}</span>
+              <span className="text-xs text-muted-foreground">
+                Booked {formatDate(booking.created_at)}
+              </span>
+            </div>
+            {detailed && (
+              <Button
+                variant="outline"
+                size="sm"
+                nativeButton={false}
+                render={<Link href={`/messages/${booking.id}`} />}
+              >
+                <MessageSquare />
+                Message
+              </Button>
+            )}
           </div>
 
           {detailed ? (
@@ -85,10 +110,9 @@ export function HostBookingCard({
                 </p>
               )}
               <Separator />
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <span>Booked on {formatDate(booking.created_at)}</span>
-                <span className="font-mono">Ref. {booking.id.slice(0, 8)}</span>
-              </div>
+              <span className="font-mono text-xs text-muted-foreground">
+                Ref. {booking.id.slice(0, 8)}
+              </span>
             </>
           )}
 

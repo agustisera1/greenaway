@@ -7,5 +7,6 @@ export const usersResolvers: Resolvers = {
       const hostId = booking.listing?.host_id;
       return hostId ? loaders.userSummary.load(hostId) : null;
     },
+    guest: (booking, _, { loaders }) => loaders.userSummary.load(booking.guest_id),
   },
 };
