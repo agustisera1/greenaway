@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
-const s3 = "https://bookings-app-listings-bucket.s3.us-east-2.amazonaws.com/**";
+// Same base URL that lib/infra/s3.ts builds for each photo.
+const s3 = `${process.env.AWS_S3_ENDPOINT}/${process.env.AWS_LISTINGS_BUCKET}/**`;
 const mocks = "https://dummyimage.com/**"; // Reset DB and clearup mock images
 
 const nextConfig: NextConfig = {
@@ -8,6 +9,8 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [new URL(s3), new URL(mocks)],
+    // The optimizer refuses private IPs by default; the S3 emulator is on localhost (db/README.md).
+    dangerouslyAllowLocalIP: true,
     // Floor for entries whose origin sends no Cache-Control (objects uploaded
     // before we started setting it, and the mocks). Next takes whichever is
     // larger, so new uploads are already governed by their own 1-year header.

@@ -27,6 +27,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # next-env.d.ts is gitignored (Next docs: TypeScript); typegen regenerates it for tsc.
+      - run: pnpm exec next typegen
+        env:
+          AWS_S3_ENDPOINT: http://localhost:9000
+          AWS_LISTINGS_BUCKET: listings
+
       - run: pnpm exec tsc --noEmit
 
       - run: pnpm lint

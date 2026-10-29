@@ -62,7 +62,7 @@ scripts/        Seeds y utilidades de datos
 
 - **Node.js 20+**, **pnpm** y **Docker** (con Compose)
 - **Puertos libres** para los contenedores: los de `PGPORT` y `REDIS_PORT` en `.env.local`, `27017`
-  (Mongo) y `8081` (Mongo Express). Un Postgres, Mongo o Redis instalado en la máquina o un contenedor
+  (Mongo), `9000`/`9001` (S3 y su consola) y `8081` (Mongo Express). Un Postgres, Mongo o Redis instalado en la máquina o un contenedor
   viejo en esos puertos hay que detenerlo antes: cómo, en [`db/README.md`](db/README.md#puertos-ocupados).
 - Para emails y chat en vivo: el repo **`greenaway-worker`** corriendo por separado
 
@@ -73,14 +73,14 @@ scripts/        Seeds y utilidades de datos
 ```bash
 pnpm install
 cp .env.example .env.local      # completar PG · Mongo · Redis · JWT · S3
-pnpm infra:up                   # Postgres, Mongo y Redis en Docker + schema + seed
+pnpm infra:up                   # Postgres, Mongo, Redis y S3 en Docker + schema + seed
 pnpm dev
 ```
 
 `infra:up` (script de `package.json` sobre `docker-compose.yml`) levanta los contenedores con las
 credenciales y puertos de `.env.local`, espera a que estén sanos y corre `db:setup` y `db:seed`. Se
 puede correr de nuevo: el seed se saltea si ya hay datos. Mongo Express (UI de Mongo) queda en
-`http://localhost:8081`. Qué hace cada script de base, qué hacer si un puerto está ocupado y los
+`http://localhost:8081` y la de S3 en `http://localhost:9001`. Qué hace cada script de base, qué hacer si un puerto está ocupado y los
 usuarios de prueba: [`db/README.md`](db/README.md).
 
 La app queda en `http://localhost:3000`. Con el seed, entrá como `lucia@greenaway.test` (host) o
@@ -99,9 +99,10 @@ separado (ver su repo).
 | `pnpm codegen`                    | regenera los tipos de GraphQL desde el schema               |
 | `pnpm infra:up`                   | infra en Docker + schema + seed                             |
 | `pnpm infra:down` · `infra:reset` | baja la infra / la borra con sus datos y la levanta de cero |
-| `pnpm db:setup`                   | schema completo: `db:migrate` + `db:indexes`                |
+| `pnpm db:setup`                   | schema completo: `db:migrate` + `db:indexes` + `db:bucket`  |
 | `pnpm db:generate` · `db:migrate` | genera / aplica migraciones de PostgreSQL                   |
 | `pnpm db:indexes`                 | crea los índices de MongoDB                                 |
+| `pnpm db:bucket`                  | crea el bucket de S3 en el contenedor                       |
 | `pnpm db:seed` · `db:reset`       | carga / borra los datos de demo                             |
 
 Detalle de migraciones, índices, seed y reset: `db/README.md`.

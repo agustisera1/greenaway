@@ -8,6 +8,7 @@ Marketplace de reservas de alojamientos (estilo Airbnb simplificado). Proyecto d
 - **Package manager**: pnpm
 - **API**: GraphQL para lecturas, ejecutado en proceso desde los Server Components (Apollo Client + `SchemaLink`, sin endpoint HTTP); Server Actions para escrituras
 - **DBs**: PostgreSQL (núcleo transaccional + outbox), MongoDB (listados, chat, notificaciones), Redis (colas, pub/sub, rate limiting)
+- **Storage**: S3 emulado con RustFS en Docker (fotos de listings; sin AWS real, ver `db/README.md`)
 - **Colas**: BullMQ sobre Redis; el worker vive en el repo `greenaway-worker`
 - **Auth**: JWT (access token en cookie httpOnly)
 - **Infra local**: Docker Compose (`docker-compose.yml`, credenciales de `.env.local`)
