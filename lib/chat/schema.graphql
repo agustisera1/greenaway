@@ -35,6 +35,7 @@ type Conversation {
   end_date: DateTime!
   status: BookingStatus!
   party: BookingParty!
+  unread_count: Int!
 }
 
 extend type Query {

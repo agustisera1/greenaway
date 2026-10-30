@@ -5,9 +5,9 @@ vi.mock("@/lib/auth/session", () => ({ authorize: vi.fn() }));
 vi.mock("./repository", () => ({
   findChatIdsByUserId: vi.fn(),
   findChatByBookingId: vi.fn(),
-  findReadCursor: vi.fn(),
+  findReadCursors: vi.fn(),
   upsertReadCursor: vi.fn(),
-  countMessagesSince: vi.fn(),
+  countUnreadByChat: vi.fn(),
   findMessagesByChatId: vi.fn(),
   findOlderCursor: vi.fn(),
 }));
@@ -29,10 +29,10 @@ import * as bookingsRepo from "@/lib/bookings/repository";
 import type { Booking } from "@/lib/bookings/types";
 import * as listingsRepo from "@/lib/listings/repository";
 import type { Listing } from "@/lib/listings/types";
-import { getChatThread, getUnreadMessagesCount } from "./queries";
+import { getChatThread, getUnreadMessagesCount, getUserConversations } from "./queries";
 import * as repo from "./repository";
 
-const CURSOR = new Date("2026-08-01T00:00:00.000Z");
+const CURSORS = new Map([["b1", new Date("2026-08-01T00:00:00.000Z")]]);
 
 function user(overrides: Partial<CurrentUser> = {}): CurrentUser {
   return {
@@ -50,8 +50,13 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(authorize).mockResolvedValue({ ok: true, data: user() });
   vi.mocked(repo.findChatIdsByUserId).mockResolvedValue(["b1", "b2"]);
-  vi.mocked(repo.findReadCursor).mockResolvedValue(CURSOR);
-  vi.mocked(repo.countMessagesSince).mockResolvedValue(3);
+  vi.mocked(repo.findReadCursors).mockResolvedValue(CURSORS);
+  vi.mocked(repo.countUnreadByChat).mockResolvedValue(
+    new Map([
+      ["b1", 3],
+      ["b2", 2],
+    ]),
+  );
 });
 
 describe("getUnreadMessagesCount", () => {
@@ -63,28 +68,13 @@ describe("getUnreadMessagesCount", () => {
     });
     const res = await getUnreadMessagesCount();
     expect(res).toEqual({ ok: false, error: "Forbidden", code: "FORBIDDEN" });
-    expect(repo.countMessagesSince).not.toHaveBeenCalled();
+    expect(repo.countUnreadByChat).not.toHaveBeenCalled();
   });
 
-  it("counts messages after the cursor, excluding the caller's own", async () => {
+  it("sums the per-chat counts over the caller's chats and cursors", async () => {
     const res = await getUnreadMessagesCount();
-    expect(res).toEqual({ ok: true, data: 3 });
-    expect(repo.countMessagesSince).toHaveBeenCalledWith(
-      ["b1", "b2"],
-      "u1",
-      CURSOR,
-    );
-  });
-
-  // A user who never opened the inbox has no cursor: everything counts.
-  it("passes a null cursor through instead of inventing one", async () => {
-    vi.mocked(repo.findReadCursor).mockResolvedValue(null);
-    await getUnreadMessagesCount();
-    expect(repo.countMessagesSince).toHaveBeenCalledWith(
-      ["b1", "b2"],
-      "u1",
-      null,
-    );
+    expect(res).toEqual({ ok: true, data: 5 });
+    expect(repo.countUnreadByChat).toHaveBeenCalledWith("u1", ["b1", "b2"], CURSORS);
   });
 
   // Chats are born with their first message, so no chats means no messages —
@@ -93,11 +83,11 @@ describe("getUnreadMessagesCount", () => {
     vi.mocked(repo.findChatIdsByUserId).mockResolvedValue([]);
     const res = await getUnreadMessagesCount();
     expect(res).toEqual({ ok: true, data: 0 });
-    expect(repo.countMessagesSince).not.toHaveBeenCalled();
+    expect(repo.countUnreadByChat).not.toHaveBeenCalled();
   });
 
   it("maps an unexpected repo failure to a generic message", async () => {
-    vi.mocked(repo.countMessagesSince).mockRejectedValue(
+    vi.mocked(repo.countUnreadByChat).mockRejectedValue(
       new Error("connection reset"),
     );
     const res = await getUnreadMessagesCount();
@@ -106,6 +96,34 @@ describe("getUnreadMessagesCount", () => {
       error: "Could not load your unread messages",
       code: "UNEXPECTED",
     });
+  });
+});
+
+describe("getUserConversations", () => {
+  const booking = (id: string) =>
+    ({ id, listing_id: "L1", guest_id: "u1", start_date: new Date("2026-09-01") }) as Booking;
+
+  beforeEach(() => {
+    vi.mocked(bookingsRepo.findBookingsByGuestId).mockResolvedValue([booking("b1"), booking("b3")]);
+    vi.mocked(bookingsRepo.findBookingsByListingIds).mockResolvedValue([]);
+    vi.mocked(listingsRepo.findListingsByIds).mockResolvedValue([
+      { _id: "L1", host_id: "h1", title: "Cabin", photos: [] } as unknown as Listing,
+    ]);
+  });
+
+  it("puts each chat's unread count on its row", async () => {
+    const res = await getUserConversations();
+    expect(res.ok && res.data.map((row) => [row.id, row.unread_count])).toEqual([
+      ["b1", 3],
+      ["b3", 0],
+    ]);
+    expect(repo.countUnreadByChat).toHaveBeenCalledWith("u1", ["b1", "b3"], CURSORS);
+  });
+
+  it("skips the count when there are no bookings", async () => {
+    vi.mocked(bookingsRepo.findBookingsByGuestId).mockResolvedValue([]);
+    expect(await getUserConversations()).toEqual({ ok: true, data: [] });
+    expect(repo.countUnreadByChat).not.toHaveBeenCalled();
   });
 });
 

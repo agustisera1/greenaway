@@ -95,6 +95,7 @@ export type Conversation = {
   start_date: Scalars['DateTime']['output'];
   status: BookingStatus;
   title: Scalars['String']['output'];
+  unread_count: Scalars['Int']['output'];
 };
 
 export type FiltersInput = {
@@ -409,6 +410,7 @@ export type ConversationResolvers<ContextType = ApolloContext, ParentType extend
   start_date?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['BookingStatus'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  unread_count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 }>;
 
 export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {

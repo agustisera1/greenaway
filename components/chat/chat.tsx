@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChatComposer } from "./chat-composer";
 import { ChatHeader } from "./chat-header";
 import { EmptyThread, ErrorState, ThreadSkeleton } from "./chat-states";
+import { MarkChatSeen } from "./mark-chat-seen";
 import { MessageThread } from "./message-thread";
 import { counterpartOf, type ChatThreadRow } from "./types";
 import { useBookingChat } from "./use-booking-chat";
@@ -28,6 +29,8 @@ export default function Chat({
 
   // Pin to the latest message when one lands; loading older ones leaves the scroll alone.
   const latestId = history.at(-1)?.id;
+  // Only the other party's messages count as unread; a sent one would just re-mark.
+  const seenAt = history.findLast((message) => message.sender_id !== currentUserId)?.timestamp;
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
@@ -41,6 +44,7 @@ export default function Chat({
     // Inherits the pane's `background`, a step darker than the rail: that
     // contrast is what sets the thread apart, so it never paints `card`.
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+      {seenAt && <MarkChatSeen bookingId={bookingId} seenAt={seenAt} />}
       <ChatHeader
         counterpart={counterpart}
         startedAt={chatMeta?.started_at}

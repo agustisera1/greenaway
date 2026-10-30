@@ -318,10 +318,15 @@ async function main() {
     const conversations = seedBookings
       .filter((booking) => booking.status !== "rejected" && chance(0.7))
       .map((booking) => makeChat(booking, listingById.get(booking.listing_id)!.host_id));
-    const readCursors: MessageReadCursor[] = [...hostIds, ...guestIds].map((user_id) => ({
-      user_id,
-      last_seen_at: new Date(now.getTime() - int(1, 3) * DAY),
-    }));
+    const readCursors: MessageReadCursor[] = conversations.flatMap(({ chat, messages }) =>
+      messages.length === 0
+        ? []
+        : [chat.guest_id, chat.host_id].map((user_id) => ({
+            user_id,
+            chat_id: chat.booking_id,
+            last_seen_at: messages[chance(0.6) ? messages.length - 1 : int(0, messages.length - 1)].timestamp,
+          })),
+    );
 
     await listingsCol.insertMany(listings);
     await db.insert(bookings).values(seedBookings);
@@ -335,7 +340,7 @@ async function main() {
       await mongo
         .db("messagesdb")
         .collection<MessageReadCursor>("read_cursors")
-        .updateOne({ user_id: cursor.user_id }, { $set: cursor }, { upsert: true });
+        .updateOne({ user_id: cursor.user_id, chat_id: cursor.chat_id }, { $set: cursor }, { upsert: true });
 
     console.log(`  ✓ users:         ${people.length} (password: ${DEMO_PASSWORD})`);
     console.log(`  ✓ listings:      ${listings.length}`);

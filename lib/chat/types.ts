@@ -19,9 +19,10 @@ export type MessageDocument = WithId<{
 
 export type SerializableMessageDocument = Omit<MessageDocument, "_id"> & { _id: string };
 
-// The only persisted read state: unread = later messages I didn't send. One per user.
+// The only persisted read state: unread = later messages I didn't send. One per user and chat.
 export type MessageReadCursor = {
   user_id: string;
+  chat_id: string;
   last_seen_at: Date;
 };
 
@@ -48,4 +49,5 @@ export type Conversation = {
   status: BookingStatus;
   party: BookingParty;
   counterpart_id: string | null;
+  unread_count: number;
 };

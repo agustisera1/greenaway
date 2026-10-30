@@ -79,7 +79,7 @@ detenerlo.
 `pnpm db:reset --yes && pnpm db:seed`.
 
 Sin `db:indexes` la app funciona pero más lenta, salvo los índices **únicos** (`chats.booking_id`,
-`read_cursors.user_id`, `notifications.event_id`): sostienen invariantes, no performance.
+`read_cursors.user_id + chat_id`, `notifications.event_id`): sostienen invariantes, no performance.
 
 ## PostgreSQL — migraciones de drizzle
 
@@ -95,7 +95,7 @@ Sin `db:indexes` la app funciona pero más lenta, salvo los índices **únicos**
 
 Todos los índices viven en `scripts/db_indexes.ts`, y ningún otro script crea índices.
 `createIndexes` no hace nada si el índice ya existe con la misma definición; si cambia su
-definición, hay que dropear el viejo antes.
+definición, el viejo va en `dropped` de su colección y el script lo borra antes de crear el nuevo.
 
 ## Seed
 
@@ -108,7 +108,7 @@ los tres flujos principales (reservar, chat y login):
 | Listings | 30, repartidos entre los hosts |
 | Reservas | ~100 en los cuatro estados: estadías pasadas, en curso, próximas, pendientes, canceladas (con su reembolso) y rechazadas |
 | Notificaciones | las que el worker habría escrito por cada transición; las de más de 3 días, leídas |
-| Chats | ~70 con sus mensajes, y un cursor de lectura por usuario que deja mensajes sin leer |
+| Chats | ~70 con sus mensajes, y un cursor de lectura por usuario y chat: la mayoría al día, el resto con mensajes sin leer |
 
 ### Usuarios de prueba
 
