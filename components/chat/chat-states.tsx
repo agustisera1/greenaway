@@ -27,12 +27,11 @@ export function ThreadSkeleton() {
 }
 
 export function EmptyThread({ counterpart }: { counterpart: Counterpart }) {
-  const other = counterpart.toLowerCase();
   return (
     <div className="flex h-full items-center justify-center">
       <EmptyState
         icon={<MessagesSquareIcon />}
-        title={`Say hello to your ${other}`}
+        title={`Say hello to ${counterpart.mention}`}
         description="No messages yet. Send the first one and it'll show up here."
       />
     </div>

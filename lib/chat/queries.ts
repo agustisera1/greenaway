@@ -1,5 +1,5 @@
 import { authorize } from "@/lib/auth/session";
-import { MAX_BOOKINGS_PER_LIST, partyOf } from "@/lib/bookings/policy";
+import { counterpartIdOf, MAX_BOOKINGS_PER_LIST, partyOf } from "@/lib/bookings/policy";
 import * as bookingsRepo from "@/lib/bookings/repository";
 import type { Booking, BookingParty } from "@/lib/bookings/types";
 import * as listingsRepo from "@/lib/listings/repository";
@@ -49,6 +49,7 @@ export async function getUserConversations(): Promise<ServiceResult<Conversation
         end_date: booking.end_date,
         status: booking.status,
         party,
+        counterpart_id: counterpartIdOf(booking, party, listing?.host_id),
       };
     };
 
@@ -101,9 +102,14 @@ export async function getChatThread(
     const listing = await listingsRepo.findListingById(booking.listing_id);
     const party = partyOf(booking, auth.data.id, listing?.host_id);
     if (!party) return notFound;
+    const counterpart_id = counterpartIdOf(booking, party, listing?.host_id);
 
     const chat = await repo.findChatByBookingId(bookingId);
-    if (!chat) return { ok: true, data: { chat, messages: { items: [], olderCursor: null }, party } };
+    if (!chat)
+      return {
+        ok: true,
+        data: { chat, messages: { items: [], olderCursor: null }, party, counterpart_id },
+      };
 
     const items = await repo.findMessagesByChatId(
       bookingId,
@@ -113,7 +119,7 @@ export async function getChatThread(
     const olderCursor = items.length
       ? await repo.findOlderCursor(bookingId, items[0].timestamp, MESSAGES_PER_PAGE)
       : null;
-    return { ok: true, data: { chat, messages: { items, olderCursor }, party } };
+    return { ok: true, data: { chat, messages: { items, olderCursor }, party, counterpart_id } };
   } catch (error) {
     console.error("[getChatThread]", error);
     return { ok: false, error: "Could not load this conversation", code: "UNEXPECTED" };

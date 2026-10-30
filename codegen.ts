@@ -21,6 +21,8 @@ const config: CodegenConfig = {
           Notification: "@/lib/notifications/types#NotificationDocument",
           ChatMeta: "@/lib/chat/types#SerializableChatDocument",
           ChatMessage: "@/lib/chat/types#SerializableMessageDocument",
+          ChatThread: "@/lib/chat/types#ChatThread",
+          Conversation: "@/lib/chat/types#Conversation",
         },
       },
     },

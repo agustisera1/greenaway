@@ -24,7 +24,7 @@ export default function Chat({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // The side comes from the server; deriving it from `chatMeta` mislabels a host on a fresh thread.
-  const counterpart = counterpartOf(viewerParty);
+  const counterpart = counterpartOf(viewerParty, thread?.counterpart?.name);
 
   // Pin to the latest message when one lands; loading older ones leaves the scroll alone.
   const latestId = history.at(-1)?.id;

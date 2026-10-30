@@ -43,6 +43,15 @@ export function partyOf(
   return listingHostId === userId ? "host" : null;
 }
 
+/** The other side of the booking from `party`: null when the listing (and its host) didn't load. */
+export function counterpartIdOf(
+  booking: Pick<Booking, "guest_id">,
+  party: BookingParty,
+  listingHostId: string | undefined,
+): string | null {
+  return party === "guest" ? (listingHostId ?? null) : booking.guest_id;
+}
+
 /** Cancelling as the host also takes the permission to manage bookings. */
 export function cancelActorOf(party: BookingParty | null, canManage: boolean): CancelActor | null {
   if (party === "host" && !canManage) return null;

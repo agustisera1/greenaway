@@ -9,4 +9,12 @@ export const usersResolvers: Resolvers = {
     },
     guest: (booking, _, { loaders }) => loaders.userSummary.load(booking.guest_id),
   },
+  Conversation: {
+    counterpart: (row, _, { loaders }) =>
+      row.counterpart_id ? loaders.userSummary.load(row.counterpart_id) : null,
+  },
+  ChatThread: {
+    counterpart: (thread, _, { loaders }) =>
+      thread.counterpart_id ? loaders.userSummary.load(thread.counterpart_id) : null,
+  },
 };

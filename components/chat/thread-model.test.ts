@@ -63,7 +63,7 @@ describe("threadReducer", () => {
     guest_id: "g",
     host_id: "h",
   };
-  const loaded = initialThreadState({ chat, messages: { items: [], olderCursor: null }, party: "guest" });
+  const loaded = initialThreadState({ chat, messages: { items: [], olderCursor: null }, party: "guest", counterpart: null });
 
   it("starts in an error state when the page couldn't load the thread", () => {
     expect(initialThreadState(null)).toMatchObject({ status: "error", messages: [] });
@@ -74,6 +74,7 @@ describe("threadReducer", () => {
       chat,
       messages: { items: [msg("a", "g", AUG1_0900)], olderCursor: null },
       party: "host",
+      counterpart: null,
     };
     expect(threadReducer(loaded, { type: "loaded", data: thread })).toEqual({
       status: "ready",

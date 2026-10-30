@@ -35,6 +35,7 @@ export type ChatThread = {
   chat: SerializableChatDocument | null;
   messages: ChatMessagePage;
   party: BookingParty;
+  counterpart_id: string | null;
 };
 
 // A row in the messages rail: a booking (whose id is the chat id) plus its listing.
@@ -46,4 +47,5 @@ export type Conversation = {
   end_date: Date;
   status: BookingStatus;
   party: BookingParty;
+  counterpart_id: string | null;
 };

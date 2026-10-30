@@ -36,7 +36,7 @@ export function MessageThread({
         </Button>
       ) : (
         <p className="mx-auto mb-4 max-w-xs text-balance text-center text-xs text-muted-foreground">
-          The beginning of your conversation with your {counterpart.toLowerCase()}
+          The beginning of your conversation with {counterpart.mention}
           {startedAt ? ` · ${formatDate(startedAt)}` : ""}
         </p>
       )}

@@ -122,7 +122,12 @@ describe("getChatThread", () => {
   it("returns the viewer's side and an empty thread before anyone speaks", async () => {
     expect(await getChatThread(BOOKING_ID, null)).toEqual({
       ok: true,
-      data: { chat: null, messages: { items: [], olderCursor: null }, party: "guest" },
+      data: {
+        chat: null,
+        messages: { items: [], olderCursor: null },
+        party: "guest",
+        counterpart_id: "h1",
+      },
     });
     expect(repo.findMessagesByChatId).not.toHaveBeenCalled();
   });

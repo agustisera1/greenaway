@@ -16,7 +16,7 @@ export function ConversationItem({
 }) {
   const { id, title, photo, start_date, end_date, status, party } =
     conversation;
-  const counterpart = counterpartOf(party);
+  const counterpart = counterpartOf(party, conversation.counterpart?.name);
 
   return (
     <Link
@@ -55,7 +55,7 @@ export function ConversationItem({
           </Badge>
         </div>
         <p className="truncate text-xs text-muted-foreground">
-          Your {counterpart.toLowerCase()}
+          {counterpart.title}
         </p>
         <p className="truncate text-xs text-muted-foreground">
           {formatDateRange(start_date, end_date)}

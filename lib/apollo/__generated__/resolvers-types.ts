@@ -2,7 +2,7 @@ import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from '
 import { BookingNode as BookingNodeModel } from '@/lib/bookings/types';
 import { Listing as ListingModel } from '@/lib/listings/types';
 import { NotificationDocument as NotificationDocumentModel } from '@/lib/notifications/types';
-import { SerializableChatDocument as SerializableChatDocumentModel, SerializableMessageDocument as SerializableMessageDocumentModel } from '@/lib/chat/types';
+import { SerializableChatDocument as SerializableChatDocumentModel, SerializableMessageDocument as SerializableMessageDocumentModel, ChatThread as ChatThreadModel, Conversation as ConversationModel } from '@/lib/chat/types';
 import { ApolloContext } from '../context';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -80,12 +80,14 @@ export type ChatMeta = {
 export type ChatThread = {
   __typename?: 'ChatThread';
   chat?: Maybe<ChatMeta>;
+  counterpart?: Maybe<UserSummary>;
   messages: ChatMessagePage;
   party: BookingParty;
 };
 
 export type Conversation = {
   __typename?: 'Conversation';
+  counterpart?: Maybe<UserSummary>;
   end_date: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
   party: BookingParty;
@@ -303,8 +305,8 @@ export type ResolversTypes = ResolversObject<{
   ChatMessage: ResolverTypeWrapper<SerializableMessageDocumentModel>;
   ChatMessagePage: ResolverTypeWrapper<Omit<ChatMessagePage, 'items'> & { items: Array<ResolversTypes['ChatMessage']> }>;
   ChatMeta: ResolverTypeWrapper<SerializableChatDocumentModel>;
-  ChatThread: ResolverTypeWrapper<Omit<ChatThread, 'chat' | 'messages'> & { chat?: Maybe<ResolversTypes['ChatMeta']>, messages: ResolversTypes['ChatMessagePage'] }>;
-  Conversation: ResolverTypeWrapper<Conversation>;
+  ChatThread: ResolverTypeWrapper<ChatThreadModel>;
+  Conversation: ResolverTypeWrapper<ConversationModel>;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   FiltersInput: FiltersInput;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
@@ -329,8 +331,8 @@ export type ResolversParentTypes = ResolversObject<{
   ChatMessage: SerializableMessageDocumentModel;
   ChatMessagePage: Omit<ChatMessagePage, 'items'> & { items: Array<ResolversParentTypes['ChatMessage']> };
   ChatMeta: SerializableChatDocumentModel;
-  ChatThread: Omit<ChatThread, 'chat' | 'messages'> & { chat?: Maybe<ResolversParentTypes['ChatMeta']>, messages: ResolversParentTypes['ChatMessagePage'] };
-  Conversation: Conversation;
+  ChatThread: ChatThreadModel;
+  Conversation: ConversationModel;
   DateTime: Scalars['DateTime']['output'];
   FiltersInput: FiltersInput;
   Float: Scalars['Float']['output'];
@@ -393,11 +395,13 @@ export type ChatMetaResolvers<ContextType = ApolloContext, ParentType extends Re
 
 export type ChatThreadResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['ChatThread'] = ResolversParentTypes['ChatThread']> = ResolversObject<{
   chat?: Resolver<Maybe<ResolversTypes['ChatMeta']>, ParentType, ContextType>;
+  counterpart?: Resolver<Maybe<ResolversTypes['UserSummary']>, ParentType, ContextType>;
   messages?: Resolver<ResolversTypes['ChatMessagePage'], ParentType, ContextType>;
   party?: Resolver<ResolversTypes['BookingParty'], ParentType, ContextType>;
 }>;
 
 export type ConversationResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['Conversation'] = ResolversParentTypes['Conversation']> = ResolversObject<{
+  counterpart?: Resolver<Maybe<ResolversTypes['UserSummary']>, ParentType, ContextType>;
   end_date?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   party?: Resolver<ResolversTypes['BookingParty'], ParentType, ContextType>;

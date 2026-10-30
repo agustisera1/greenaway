@@ -4,6 +4,7 @@ import type {
   GetConversationsQuery,
 } from "@/lib/apollo/__generated__/operations";
 import type { DeliveredMessage } from "@/lib/chat/socket";
+import { initialsFrom } from "@/lib/shared/utils";
 
 // `pending` and `failed` are client-only states of an optimistic message; never persisted.
 export type ThreadMessage = DeliveredMessage & {
@@ -14,12 +15,14 @@ export type ThreadMessage = DeliveredMessage & {
 /** Load state of the chat history fetch. */
 export type Status = "loading" | "error" | "ready";
 
-// The other party's role relative to the viewer; we never have their name.
-export type Counterpart = "Host" | "Guest";
+// Who the viewer talks to: `title` heads a line, `mention` goes mid-sentence.
+export type Counterpart = { title: string; mention: string; initials: string };
 
-// Defined once next to its type: the thread and the rail both need the flip.
-export function counterpartOf(viewerParty: BookingParty): Counterpart {
-  return viewerParty === "guest" ? "Host" : "Guest";
+// Without a name (the user lookup failed), the other party's role stands in.
+export function counterpartOf(viewerParty: BookingParty, name?: string | null): Counterpart {
+  if (name) return { title: name, mention: name.split(" ")[0], initials: initialsFrom(name) };
+  const role = viewerParty === "guest" ? "host" : "guest";
+  return { title: `Your ${role}`, mention: `your ${role}`, initials: role[0].toUpperCase() };
 }
 
 /** A row of the messages rail, as GraphQL delivers it. */

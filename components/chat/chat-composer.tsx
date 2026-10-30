@@ -48,8 +48,8 @@ export function ChatComposer({
           onKeyDown={handleKeyDown}
           maxLength={MAX_MESSAGE_LENGTH}
           disabled={!connected}
-          aria-label={`Message your ${counterpart.toLowerCase()}`}
-          placeholder={`Message your ${counterpart.toLowerCase()}…`}
+          aria-label={`Message ${counterpart.mention}`}
+          placeholder={`Message ${counterpart.mention}…`}
           className="min-h-0 flex-1 resize-none border-0 bg-transparent px-2.5 py-2 text-sm shadow-none focus-visible:ring-0 disabled:bg-transparent disabled:opacity-100"
         />
         <Button
