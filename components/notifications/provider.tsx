@@ -17,7 +17,6 @@ type NotificationsContextValue = {
   messages: number;
   increment: () => void;
   decrement: () => void;
-  clearMessages: () => void;
 };
 
 // In context because the sidebar badges and the list sit in other subtrees than the EventSource.
@@ -43,12 +42,6 @@ export function useNotificationsCount(): number {
 // Read-only: unread messages, for the badge on the Messages nav item.
 export function useUnreadMessagesCount(): number {
   return useNotificationsContext().messages;
-}
-
-// Zeroes the messages badge. Its server-side counterpart is `markMessagesAsSeen`
-// — this only moves the number the user is looking at.
-export function useClearUnreadMessages(): () => void {
-  return useNotificationsContext().clearMessages;
 }
 
 // Mutators for callers that change the unread count (reading a notification).
@@ -80,7 +73,6 @@ export function NotificationsProvider({
 
   const increment = useCallback(() => setCount((c) => c + 1), []);
   const decrement = useCallback(() => setCount((c) => Math.max(0, c - 1)), []);
-  const clearMessages = useCallback(() => setMessages(0), []);
 
   useEffect(() => {
     const es = new EventSource("/api/subscribe");
@@ -100,8 +92,8 @@ export function NotificationsProvider({
   }, [router]);
 
   const value = useMemo(
-    () => ({ count, messages, increment, decrement, clearMessages }),
-    [count, messages, increment, decrement, clearMessages],
+    () => ({ count, messages, increment, decrement }),
+    [count, messages, increment, decrement],
   );
 
   return (

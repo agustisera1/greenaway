@@ -8,3 +8,12 @@ extend type Booking {
   host: UserSummary
   guest: UserSummary
 }
+
+# The other side of the booking, as the viewer sees them.
+extend type Conversation {
+  counterpart: UserSummary
+}
+
+extend type ChatThread {
+  counterpart: UserSummary
+}

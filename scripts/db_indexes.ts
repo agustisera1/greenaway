@@ -1,8 +1,24 @@
 // Every Mongo index lives here, nowhere else. Idempotent: `pnpm db:indexes` can run any number
 // of times. Criteria in `.claude/rules/04-datos.md`.
-import { MongoClient, type IndexDescription } from "mongodb";
+import { MongoClient, MongoServerError, type IndexDescription } from "mongodb";
 
-type CollectionIndexes = { db: string; collection: string; indexes: IndexDescription[] };
+// `dropped`: indexes replaced by a new definition. `createIndexes` never removes one on its own.
+type CollectionIndexes = {
+  db: string;
+  collection: string;
+  indexes: IndexDescription[];
+  dropped?: string[];
+};
+
+// Already gone (26: no collection, 27: no index) is the state we want: running again is a no-op.
+async function dropIfExists(client: MongoClient, db: string, collection: string, name: string) {
+  try {
+    await client.db(db).collection(collection).dropIndex(name);
+    console.log(`  ✓ ${db}.${collection}: dropped ${name}`);
+  } catch (error) {
+    if (!(error instanceof MongoServerError && (error.code === 26 || error.code === 27))) throw error;
+  }
+}
 
 const SCHEMA: CollectionIndexes[] = [
   {
@@ -32,7 +48,9 @@ const SCHEMA: CollectionIndexes[] = [
   {
     db: "messagesdb",
     collection: "read_cursors",
-    indexes: [{ key: { user_id: 1 }, name: "user_id_unique", unique: true }],
+    // Makes the cursor upsert atomic: one cursor per user and chat.
+    indexes: [{ key: { user_id: 1, chat_id: 1 }, name: "user_chat_unique", unique: true }],
+    dropped: ["user_id_unique"],
   },
   {
     db: "notificationsdb",
@@ -57,7 +75,8 @@ async function main() {
   const client = new MongoClient(uri);
   try {
     await client.connect();
-    for (const { db, collection, indexes } of SCHEMA) {
+    for (const { db, collection, indexes, dropped = [] } of SCHEMA) {
+      for (const name of dropped) await dropIfExists(client, db, collection, name);
       const names = await client.db(db).collection(collection).createIndexes(indexes);
       console.log(`  ✓ ${db}.${collection}: ${names.join(", ")}`);
     }

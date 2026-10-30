@@ -64,27 +64,42 @@ export async function findOlderCursor(
   return documents.at(-1)?.timestamp ?? null;
 }
 
-export async function findReadCursor(userId: string): Promise<Date | null> {
-  const document = await (await readCursors()).findOne({ user_id: userId });
-  return document?.last_seen_at ?? null;
+export async function findReadCursors(userId: string): Promise<Map<string, Date>> {
+  const documents = await (await readCursors()).find({ user_id: userId }).toArray();
+  return new Map(documents.map((document) => [document.chat_id, document.last_seen_at]));
 }
 
-export async function upsertReadCursor(userId: string, lastSeenAt: Date): Promise<void> {
+// `$max`: a late or stale request never moves the cursor back.
+export async function upsertReadCursor(
+  userId: string,
+  chatId: string,
+  seenAt: Date,
+): Promise<void> {
   await (await readCursors()).updateOne(
-    { user_id: userId },
-    { $set: { last_seen_at: lastSeenAt } },
+    { user_id: userId, chat_id: chatId },
+    { $max: { last_seen_at: seenAt } },
     { upsert: true },
   );
 }
 
-export async function countMessagesSince(
+export async function countUnreadByChat(
+  userId: string,
   chatIds: string[],
-  excludeSenderId: string,
-  since: Date | null,
-): Promise<number> {
-  return (await messages()).countDocuments({
-    chat_id: { $in: chatIds },
-    sender_id: { $ne: excludeSenderId },
-    ...(since ? { timestamp: { $gt: since } } : {}),
-  });
+  cursors: Map<string, Date>,
+): Promise<Map<string, number>> {
+  const groups = await (await messages())
+    .aggregate<{ _id: string; count: number }>([
+      {
+        $match: {
+          sender_id: { $ne: userId },
+          $or: chatIds.map((chatId) => {
+            const since = cursors.get(chatId);
+            return since ? { chat_id: chatId, timestamp: { $gt: since } } : { chat_id: chatId };
+          }),
+        },
+      },
+      { $group: { _id: "$chat_id", count: { $sum: 1 } } },
+    ])
+    .toArray();
+  return new Map(groups.map((group) => [group._id, group.count]));
 }

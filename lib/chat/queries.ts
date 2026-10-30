@@ -1,5 +1,5 @@
 import { authorize } from "@/lib/auth/session";
-import { MAX_BOOKINGS_PER_LIST, partyOf } from "@/lib/bookings/policy";
+import { counterpartIdOf, MAX_BOOKINGS_PER_LIST, partyOf } from "@/lib/bookings/policy";
 import * as bookingsRepo from "@/lib/bookings/repository";
 import type { Booking, BookingParty } from "@/lib/bookings/types";
 import * as listingsRepo from "@/lib/listings/repository";
@@ -14,7 +14,7 @@ const MESSAGES_PER_PAGE = 50;
 const MAX_THREAD_MESSAGES = 500;
 
 // Derived from bookings, not the chats collection: a booking is a conversation
-// whether or not anyone wrote in it, so rows carry no last message or unread state.
+// whether or not anyone wrote in it. A booking's id is its chat's id, so it keys the unread count.
 export async function getUserConversations(): Promise<ServiceResult<Conversation[]>> {
   const auth = await authorize("chat:view-own");
   if (!auth.ok) return auth;
@@ -39,6 +39,11 @@ export async function getUserConversations(): Promise<ServiceResult<Conversation
       [...guestListings, ...hostListings].map((listing) => [listing._id, listing]),
     );
 
+    const bookingIds = [...guestBookings, ...hostBookings].map((booking) => booking.id);
+    const unreadByChat = bookingIds.length
+      ? await repo.countUnreadByChat(user.id, bookingIds, await repo.findReadCursors(user.id))
+      : new Map<string, number>();
+
     const toConversation = (booking: Booking, party: BookingParty): Conversation => {
       const listing = listingById.get(booking.listing_id);
       return {
@@ -49,6 +54,8 @@ export async function getUserConversations(): Promise<ServiceResult<Conversation
         end_date: booking.end_date,
         status: booking.status,
         party,
+        counterpart_id: counterpartIdOf(booking, party, listing?.host_id),
+        unread_count: unreadByChat.get(booking.id) ?? 0,
       };
     };
 
@@ -64,7 +71,7 @@ export async function getUserConversations(): Promise<ServiceResult<Conversation
   }
 }
 
-// Messages received since the user last opened the inbox (the read cursor).
+// Messages received after each chat's read cursor: the sum of the rail's per-chat counts.
 export async function getUnreadMessagesCount(): Promise<ServiceResult<number>> {
   const auth = await authorize("chat:view-own");
   if (!auth.ok) return auth;
@@ -75,8 +82,9 @@ export async function getUnreadMessagesCount(): Promise<ServiceResult<number>> {
     const chatIds = await repo.findChatIdsByUserId(user.id);
     if (chatIds.length === 0) return { ok: true, data: 0 };
 
-    const since = await repo.findReadCursor(user.id);
-    return { ok: true, data: await repo.countMessagesSince(chatIds, user.id, since) };
+    const cursors = await repo.findReadCursors(user.id);
+    const unreadByChat = await repo.countUnreadByChat(user.id, chatIds, cursors);
+    return { ok: true, data: [...unreadByChat.values()].reduce((sum, count) => sum + count, 0) };
   } catch (error) {
     console.error("[getUnreadMessagesCount]", error);
     return { ok: false, error: "Could not load your unread messages", code: "UNEXPECTED" };
@@ -101,9 +109,14 @@ export async function getChatThread(
     const listing = await listingsRepo.findListingById(booking.listing_id);
     const party = partyOf(booking, auth.data.id, listing?.host_id);
     if (!party) return notFound;
+    const counterpart_id = counterpartIdOf(booking, party, listing?.host_id);
 
     const chat = await repo.findChatByBookingId(bookingId);
-    if (!chat) return { ok: true, data: { chat, messages: { items: [], olderCursor: null }, party } };
+    if (!chat)
+      return {
+        ok: true,
+        data: { chat, messages: { items: [], olderCursor: null }, party, counterpart_id },
+      };
 
     const items = await repo.findMessagesByChatId(
       bookingId,
@@ -113,7 +126,7 @@ export async function getChatThread(
     const olderCursor = items.length
       ? await repo.findOlderCursor(bookingId, items[0].timestamp, MESSAGES_PER_PAGE)
       : null;
-    return { ok: true, data: { chat, messages: { items, olderCursor }, party } };
+    return { ok: true, data: { chat, messages: { items, olderCursor }, party, counterpart_id } };
   } catch (error) {
     console.error("[getChatThread]", error);
     return { ok: false, error: "Could not load this conversation", code: "UNEXPECTED" };

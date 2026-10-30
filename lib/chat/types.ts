@@ -19,9 +19,10 @@ export type MessageDocument = WithId<{
 
 export type SerializableMessageDocument = Omit<MessageDocument, "_id"> & { _id: string };
 
-// The only persisted read state: unread = later messages I didn't send. One per user.
+// The only persisted read state: unread = later messages I didn't send. One per user and chat.
 export type MessageReadCursor = {
   user_id: string;
+  chat_id: string;
   last_seen_at: Date;
 };
 
@@ -35,6 +36,7 @@ export type ChatThread = {
   chat: SerializableChatDocument | null;
   messages: ChatMessagePage;
   party: BookingParty;
+  counterpart_id: string | null;
 };
 
 // A row in the messages rail: a booking (whose id is the chat id) plus its listing.
@@ -46,4 +48,6 @@ export type Conversation = {
   end_date: Date;
   status: BookingStatus;
   party: BookingParty;
+  counterpart_id: string | null;
+  unread_count: number;
 };

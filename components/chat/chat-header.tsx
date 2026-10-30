@@ -17,7 +17,7 @@ export function ChatHeader({
       <ChatAvatar counterpart={counterpart} size="md" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold leading-tight">
-          Your {counterpart.toLowerCase()}
+          {counterpart.title}
         </p>
         <p className="truncate text-xs text-muted-foreground">
           {status === "ready" && startedAt

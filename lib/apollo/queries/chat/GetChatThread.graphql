@@ -1,6 +1,10 @@
 query GetChatThread($id: ID!, $from: DateTime) {
   chatThread(id: $id, from: $from) {
     party
+    counterpart {
+      id
+      name
+    }
     chat {
       id
       booking_id

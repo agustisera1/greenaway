@@ -14,9 +14,9 @@ export function ConversationItem({
   conversation: Conversation;
   active: boolean;
 }) {
-  const { id, title, photo, start_date, end_date, status, party } =
+  const { id, title, photo, start_date, end_date, status, party, unread_count } =
     conversation;
-  const counterpart = counterpartOf(party);
+  const counterpart = counterpartOf(party, conversation.counterpart?.name);
 
   return (
     <Link
@@ -55,11 +55,19 @@ export function ConversationItem({
           </Badge>
         </div>
         <p className="truncate text-xs text-muted-foreground">
-          Your {counterpart.toLowerCase()}
+          {counterpart.title}
         </p>
-        <p className="truncate text-xs text-muted-foreground">
-          {formatDateRange(start_date, end_date)}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="truncate text-xs text-muted-foreground">
+            {formatDateRange(start_date, end_date)}
+          </p>
+          {unread_count > 0 && (
+            <Badge variant="primary" className="ml-auto shrink-0 tabular-nums">
+              {unread_count}
+              <span className="sr-only"> unread</span>
+            </Badge>
+          )}
+        </div>
       </div>
     </Link>
   );
