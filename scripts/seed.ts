@@ -11,12 +11,11 @@ import { bookings } from "../lib/bookings/tables";
 import type { BookingStatus } from "../lib/bookings/types";
 import type { ChatDocument, MessageDocument, MessageReadCursor } from "../lib/chat/types";
 import type { ListingDocumentValues } from "../lib/listings/types";
-import { AMENITIES, PROPERTY_TYPES } from "../lib/listings/validation";
+import { AMENITIES } from "../lib/listings/validation";
 import type { NotificationDocument } from "../lib/notifications/types";
 import { users } from "../lib/users/tables";
 
 const DEMO_PASSWORD = "greenaway-demo";
-const LISTING_COUNT = 30;
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
 
@@ -35,37 +34,74 @@ const GUESTS = [
   { name: "Nicolás Benítez", email: "nicolas@greenaway.test" },
 ];
 
-const CITIES = [
-  { city: "Buenos Aires", lat: -34.6037, lng: -58.3816 },
-  { city: "Córdoba", lat: -31.4201, lng: -64.1888 },
-  { city: "Rosario", lat: -32.9442, lng: -60.6505 },
-  { city: "Mendoza", lat: -32.8908, lng: -68.8272 },
-  { city: "Bariloche", lat: -41.1335, lng: -71.3103 },
-  { city: "Salta", lat: -24.7859, lng: -65.4116 },
-  { city: "Ushuaia", lat: -54.8019, lng: -68.303 },
-  { city: "Mar del Plata", lat: -38.0055, lng: -57.5426 },
-];
-
-const TITLES = [
-  "Bright apartment downtown",
-  "House with garden and pool",
-  "Cabin in the woods",
-  "Modern loft by the river",
-  "Suite with a panoramic view",
-  "Cozy studio in the old town",
-  "Mountain country house",
-  "Lakefront bungalow",
-  "Penthouse with a private terrace",
-  "Villa with its own vineyard",
-];
-
-const DESCRIPTIONS = [
-  "A quiet place to rest and unplug, fully equipped with everything you need.",
-  "Surrounded by nature, perfect for couples or families looking for a getaway.",
-  "Contemporary design with noble materials, minutes away from the main sights.",
-  "Bright and spacious, with a fully equipped kitchen and a dedicated workspace.",
-  "Stunning views and direct access to trails and outdoor activities.",
-];
+const STAYS = [
+  {
+    city: "Bariloche", lat: -41.1335, lng: -71.3103, propertyType: "cabin",
+    titles: ["Log cabin in the Bariloche forest", "Woodland cabin near Cerro Otto"],
+    description: "A log cabin among coihues, with a wood stove and trails starting at the door.",
+    photos: ["1570793005386-840846445fed", "1627750168257-9a7d3965ef8b", "1762378839057-0acfcf11e365", "1621771674545-849014cf91fa"],
+  },
+  {
+    city: "Bariloche", lat: -41.0602, lng: -71.5317, propertyType: "house",
+    titles: ["Lakefront house on Nahuel Huapi", "House with a private dock on the lake"],
+    description: "Wake up to the lake, kayak from the dock and end the day by the fire.",
+    photos: ["1666066378095-6fad8fc100ea", "1578453223871-970d2d15b57a", "1592944083147-df73ff3f71e5", "1716824272167-876189244a41"],
+  },
+  {
+    city: "El Chaltén", lat: -49.3315, lng: -72.8863, propertyType: "cabin",
+    titles: ["Trekking base under Fitz Roy", "Hikers' cabin at the Laguna de los Tres trailhead"],
+    description: "Built for trekkers: drying room, packed lunches and the Fitz Roy trails a short walk away.",
+    photos: ["1551632811-561732d1e306", "1772171722289-f2848447fb07", "1780593195639-8f5cb6a2b310", "1772171838855-96e0e49438fc"],
+  },
+  {
+    city: "Villa La Angostura", lat: -40.7617, lng: -71.6458, propertyType: "cabin",
+    titles: ["Lakeside hut on the Seven Lakes Route", "Mountain hut facing Lago Correntoso"],
+    description: "Snowy peaks over a quiet lake, with trails, kayaks and stargazing on the shore.",
+    photos: ["1708394534994-4e66c2b09e1f", "1585491665805-48272c97a0f6", "1546569397-ab326af881f5", "1558517286-8a9cb0b8c793"],
+  },
+  {
+    city: "Ushuaia", lat: -54.8019, lng: -68.303, propertyType: "cabin",
+    titles: ["Mountain refuge at the end of the world", "Cabin on the Beagle Channel"],
+    description: "Between the Martial range and the Beagle Channel, ready for hikes and boat trips.",
+    photos: ["1768087512696-bacd7eab5f85", "1652743920719-307f6333be00", "1615656543085-130a54570311", "1651489000754-1bc96a562520"],
+  },
+  {
+    city: "El Bolsón", lat: -41.9644, lng: -71.5347, propertyType: "cabin",
+    titles: ["Meadow cabin in the Andean valley", "Hillside cabin under Cerro Piltriquitrón"],
+    description: "A small cabin in green pastures, with mountain views and the craft fair nearby.",
+    photos: ["1774918178986-1ab3e322f58f", "1724709865844-edc4f56c7745", "1566754844421-9bc834baf4a3", "1475087542963-13ab5e611954"],
+  },
+  {
+    city: "Mar del Plata", lat: -38.0055, lng: -57.5426, propertyType: "house",
+    titles: ["Surf house steps from the waves", "Beach house with a board rack"],
+    description: "Boards and wetsuits included, with the best breaks on the coast a short walk away.",
+    photos: ["1730087356417-ec7c8c93ef86", "1604828268259-cf9d7009d5fa", "1776009295257-a01592563e00", "1789796831446-16d9fa051fa9"],
+  },
+  {
+    city: "Chapadmalal", lat: -38.1806, lng: -57.6489, propertyType: "house",
+    titles: ["Beach hostel with bonfire nights", "Seaside camp house on the cliffs"],
+    description: "Shared kitchen, campfires on the sand and a quiet beach right below the cliffs.",
+    photos: ["1767206106418-1fca6a5daef2", "1766338796789-80606cee416f", "1773762159818-d929964ab226", "1772849141383-213316a7102d"],
+  },
+  {
+    city: "Tunuyán", lat: -33.5767, lng: -69.0186, propertyType: "villa",
+    titles: ["Vineyard stay in the Uco Valley", "Winery house with Andes views"],
+    description: "Among Malbec vines at the foot of the Andes, with tastings and horseback rides.",
+    photos: ["1765574782003-75d8f507f939", "1690742135975-f04123a1c471", "1765850258591-ac294919250b", "1765574781851-3cdc7a900a58"],
+  },
+  {
+    city: "Cafayate", lat: -26.0731, lng: -65.9761, propertyType: "villa",
+    titles: ["Estancia among Cafayate vineyards", "Adobe estancia in the Calchaquí Valleys"],
+    description: "Torrontés vineyards, red canyons and valley trails under the northern sun.",
+    photos: ["1657830823435-a787c6b73193", "1660866838729-bed5f8824b5c", "1660866838175-b5f136e1cb94", "1648160721431-5bdc57b69d89"],
+  },
+  {
+    city: "Mina Clavero", lat: -31.7228, lng: -65.0067, propertyType: "house",
+    titles: ["Country house in the Córdoba hills", "Ranch house in Traslasierra"],
+    description: "Rivers, horseback rides and hikes through the sierras, far from the city.",
+    photos: ["1694184023356-e1edfd130269", "1694183766192-43fd46afeb94", "1705783499448-d0bd4688cffd", "1582771642649-1feec8e95eb3"],
+  },
+] as const;
 
 const GUEST_LINES = [
   "Hi! I just booked these dates. Is early check-in possible?",
@@ -132,16 +168,14 @@ type SeedListing = ListingDocumentValues & { _id: ObjectId };
 type SeedBooking = typeof bookings.$inferInsert & { id: string; created_at: Date };
 type SeedNotification = Omit<NotificationDocument, "_id" | "created_at"> & { _id: ObjectId };
 
-function makeListing(hostId: string): SeedListing {
-  const place = pick(CITIES);
+function makeListing(hostId: string, place: (typeof STAYS)[number], title: string): SeedListing {
   const beds = int(1, 4);
-  const title = `${pick(TITLES)} in ${place.city}`;
   return {
     _id: new ObjectId(),
     type: "accommodation",
     host_id: hostId,
     title,
-    description: pick(DESCRIPTIONS),
+    description: place.description,
     price: int(4, 35) * 10,
     location: {
       type: "Point",
@@ -158,12 +192,10 @@ function makeListing(hostId: string): SeedListing {
       check_out_time: pick(["10:00", "11:00"]),
       amenities: pickSome(AMENITIES, int(3, 7)),
       minimum_nights: pick([1, 2]),
-      property_type: pick(PROPERTY_TYPES),
+      property_type: place.propertyType,
     },
-    photos: Array.from(
-      { length: int(2, 4) },
-      (_, n) =>
-        `https://dummyimage.com/1200x800/1f2a24/e8efe9.png&text=${encodeURIComponent(`${title} · ${n + 1}`)}`,
+    photos: pickSome(place.photos, int(2, 4)).map(
+      (id) => `https://images.unsplash.com/photo-${id}?w=1200&h=800&fit=crop`,
     ),
   };
 }
@@ -308,7 +340,9 @@ async function main() {
     const hostIds = HOSTS.map((host) => idOf.get(host.email)!);
     const guestIds = GUESTS.map((guest) => idOf.get(guest.email)!);
 
-    const listings = Array.from({ length: LISTING_COUNT }, (_, i) => makeListing(hostIds[i % hostIds.length]));
+    const listings = [0, 1]
+      .flatMap((n) => STAYS.map((stay) => ({ stay, title: stay.titles[n] })))
+      .map(({ stay, title }, i) => makeListing(hostIds[i % hostIds.length], stay, title));
     const seedBookings = listings.flatMap((listing) => makeBookings(listing, guestIds));
     const listingById = new Map(listings.map((listing) => [listing._id.toHexString(), listing]));
 
