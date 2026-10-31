@@ -179,6 +179,7 @@ export default async function ListingDetailPage({
             title="Book this listing"
             subtitle={<PriceLabel price={listing.price} />}
             card
+            className="lg:w-80"
           >
             <BookingForm
               listingId={listing.id}
