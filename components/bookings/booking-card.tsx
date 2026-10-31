@@ -10,7 +10,6 @@ import {
   bookingStatusVariant,
   listingTypeGradient,
 } from "@/lib/shared/utils";
-import { CancelBookingButton } from "@/components/bookings/cancel-booking-button";
 import type { BookingRow } from "./bookings-model";
 
 export function BookingCard({
@@ -30,8 +29,7 @@ export function BookingCard({
           muted && "opacity-90",
         )}
       >
-        {/* Stretched link: the whole card navigates to the detail page. Sits
-            below interactive children (cancel), which lift above it with z-10. */}
+        {/* Stretched link: the whole card navigates to the detail page. */}
         <Link
           href={`/bookings/${booking.id}`}
           className="absolute inset-0 z-0"
@@ -87,13 +85,6 @@ export function BookingCard({
               >
                 {booking.status}
               </Badge>
-            </div>
-            <div className="relative z-10 flex items-center gap-1">
-              <CancelBookingButton
-                bookingId={booking.id ?? ""}
-                actor="guest"
-                booking={booking}
-              />
             </div>
           </div>
         </CardContent>

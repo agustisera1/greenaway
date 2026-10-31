@@ -13,6 +13,7 @@ import type { ChatDocument, MessageDocument, MessageReadCursor } from "../lib/ch
 import type { ListingDocumentValues } from "../lib/listings/types";
 import { AMENITIES } from "../lib/listings/validation";
 import type { NotificationDocument } from "../lib/notifications/types";
+import { reviews } from "../lib/reviews/tables";
 import { users } from "../lib/users/tables";
 
 const DEMO_PASSWORD = "greenaway-demo";
@@ -121,6 +122,28 @@ const HOST_LINES = [
   "Thank you for staying! You're welcome back anytime.",
 ];
 
+const REVIEW_COMMENTS: Record<number, string[]> = {
+  5: [
+    "Exactly like the photos. The views alone are worth the trip.",
+    "Spotless, cozy and the host thought of everything. We'll be back.",
+    "Perfect base for exploring the area. Loved every minute.",
+  ],
+  4: [
+    "Great stay overall. The bed could be a bit firmer, but the location is unbeatable.",
+    "Lovely place and a very responsive host. Wifi was a little slow.",
+  ],
+  3: [
+    "Nice spot, though it needed a deeper clean when we arrived.",
+    "Good location, but the heating took a while to warm the place up.",
+  ],
+};
+
+const HOST_REPLIES = [
+  "Thank you for staying with us! Hope to see you again soon.",
+  "Thanks for the feedback, we've already taken care of it.",
+  "So glad you enjoyed it. You're welcome back anytime!",
+];
+
 const REJECT_REASONS = [
   "Those dates are blocked for maintenance, sorry!",
   "I can't host a group of that size, sorry.",
@@ -172,6 +195,7 @@ function objectIdAt(date: Date) {
 type SeedListing = ListingDocumentValues & { _id: ObjectId };
 type SeedBooking = typeof bookings.$inferInsert & { id: string; created_at: Date };
 type SeedNotification = Omit<NotificationDocument, "_id" | "created_at"> & { _id: ObjectId };
+type SeedReview = typeof reviews.$inferInsert;
 
 function makeListing(hostId: string, place: (typeof STAYS)[number], title: string): SeedListing {
   const beds = int(1, 4);
@@ -246,6 +270,21 @@ function makeBookings(listing: SeedListing, guestIds: string[]): SeedBooking[] {
     }
     return booking;
   });
+}
+
+// Only finished stays get reviewed, same as `createReview`.
+function makeReview(booking: SeedBooking, nameOf: Map<string, string>): SeedReview | null {
+  const end = booking.end_date as Date;
+  if (booking.status !== "accepted" || end.getTime() >= now.getTime() || !chance(0.75)) return null;
+  const rating = pick([5, 5, 5, 4, 4, 3]);
+  return {
+    listing_id: booking.listing_id,
+    author_name: nameOf.get(booking.guest_id)!,
+    rating,
+    comment: pick(REVIEW_COMMENTS[rating]),
+    host_reply: chance(0.4) ? pick(HOST_REPLIES) : null,
+    created_at: notAfterNow(new Date(end.getTime() + int(1, 5) * DAY)),
+  };
 }
 
 // What the worker would have written for each transition: the party that didn't act gets it.
@@ -367,6 +406,14 @@ async function main() {
     const seedBookings = listings.flatMap((listing) => makeBookings(listing, guestIds));
     const listingById = new Map(listings.map((listing) => [listing._id.toHexString(), listing]));
 
+    const seedReviews = seedBookings.flatMap((booking) => makeReview(booking, nameOf) ?? []);
+    // Nothing in the app derives `rating_avg` from the reviews, so the seed writes it.
+    for (const listing of listings) {
+      const ratings = seedReviews.filter((r) => r.listing_id === listing._id.toHexString()).map((r) => r.rating);
+      if (ratings.length > 0)
+        listing.rating_avg = Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10;
+    }
+
     const notifications = seedBookings.flatMap((booking) =>
       makeNotifications(booking, listingById.get(booking.listing_id)!, nameOf),
     );
@@ -385,6 +432,7 @@ async function main() {
 
     await listingsCol.insertMany(listings);
     await db.insert(bookings).values(seedBookings);
+    if (seedReviews.length > 0) await db.insert(reviews).values(seedReviews);
     await mongo.db("notificationsdb").collection<SeedNotification>("notifications").insertMany(notifications);
     await mongo.db("chatsdb").collection<Omit<ChatDocument, "_id">>("chats").insertMany(conversations.map((c) => c.chat));
     await mongo
@@ -400,6 +448,7 @@ async function main() {
     console.log(`  ✓ users:         ${people.length} (password: ${DEMO_PASSWORD})`);
     console.log(`  ✓ listings:      ${listings.length}`);
     console.log(`  ✓ bookings:      ${seedBookings.length}`);
+    console.log(`  ✓ reviews:       ${seedReviews.length}`);
     console.log(`  ✓ notifications: ${notifications.length}`);
     console.log(`  ✓ chats:         ${conversations.length} (${conversations.flatMap((c) => c.messages).length} messages)`);
   } finally {

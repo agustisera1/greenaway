@@ -16,14 +16,7 @@ export type HostBooking = NonNullable<
   NonNullable<GetListingBookingsQuery["listing"]>["bookings"]
 >[number];
 
-// `detailed` is the full-page view: adds the stay facts, booking record and refund.
-export function HostBookingCard({
-  booking,
-  detailed = false,
-}: {
-  booking: HostBooking;
-  detailed?: boolean;
-}) {
+export function HostBookingCard({ booking }: { booking: HostBooking }) {
   const nights = calcNights(booking.start_date, booking.end_date);
   const isPending = booking.status === "pending";
   const isCancelled = booking.status === "cancelled";
@@ -56,43 +49,31 @@ export function HostBookingCard({
                 Booked {formatDate(booking.created_at)}
               </span>
             </div>
-            {detailed && (
-              <Button
-                variant="outline"
-                size="sm"
-                nativeButton={false}
-                render={<Link href={`/messages/${booking.id}`} />}
-              >
-                <MessageSquare />
-                Message
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link href={`/messages/${booking.id}`} />}
+            >
+              <MessageSquare />
+              Message
+            </Button>
           </div>
 
-          {detailed ? (
-            <dl className="grid grid-cols-2 gap-4 py-1">
-              <Fact
-                icon={<LogIn />}
-                label="Check-in"
-                value={formatDate(booking.start_date)}
-              />
-              <Fact
-                icon={<LogOut />}
-                label="Check-out"
-                value={formatDate(booking.end_date)}
-              />
-              <Fact icon={<Moon />} label="Nights" value={nights || "-"} />
-              <Fact icon={<Users />} label="Guests" value={booking.guests} />
-            </dl>
-          ) : (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Users className="size-3.5 shrink-0" />
-              <span>
-                {nights} night{nights !== 1 ? "s" : ""} · {booking.guests} guest
-                {booking.guests !== 1 ? "s" : ""}
-              </span>
-            </div>
-          )}
+          <dl className="grid grid-cols-2 gap-4 py-1">
+            <Fact
+              icon={<LogIn />}
+              label="Check-in"
+              value={formatDate(booking.start_date)}
+            />
+            <Fact
+              icon={<LogOut />}
+              label="Check-out"
+              value={formatDate(booking.end_date)}
+            />
+            <Fact icon={<Moon />} label="Nights" value={nights || "-"} />
+            <Fact icon={<Users />} label="Guests" value={booking.guests} />
+          </dl>
 
           {booking.status_reason && (
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -100,21 +81,17 @@ export function HostBookingCard({
             </p>
           )}
 
-          {detailed && (
-            <>
-              {isCancelled && booking.cancelled_by && (
-                <p className="text-sm text-muted-foreground">
-                  Cancelled by the {booking.cancelled_by}
-                  {booking.refund_amount > 0 &&
-                    ` · ${formatPrice(booking.refund_amount)} refunded`}
-                </p>
-              )}
-              <Separator />
-              <span className="font-mono text-xs text-muted-foreground">
-                Ref. {booking.id.slice(0, 8)}
-              </span>
-            </>
+          {isCancelled && booking.cancelled_by && (
+            <p className="text-sm text-muted-foreground">
+              Cancelled by the {booking.cancelled_by}
+              {booking.refund_amount > 0 &&
+                ` · ${formatPrice(booking.refund_amount)} refunded`}
+            </p>
           )}
+          <Separator />
+          <span className="font-mono text-xs text-muted-foreground">
+            Ref. {booking.id.slice(0, 8)}
+          </span>
 
           <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
             <span className="text-base font-semibold tabular-nums">

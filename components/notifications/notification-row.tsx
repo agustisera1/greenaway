@@ -29,7 +29,7 @@ export function NotificationRow({
   return (
     <li
       className={cn(
-        "relative flex items-start gap-4 rounded-xl border border-border p-4 transition-shadow hover:shadow-lg",
+        "relative isolate flex items-start gap-4 rounded-xl border border-border p-4 transition-shadow hover:shadow-lg",
         !read && "bg-card",
       )}
     >

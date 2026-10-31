@@ -144,19 +144,19 @@ export default async function ListingDetailPage({
         </PageLayout>
       </div>
 
-      <aside className="flex shrink-0 flex-col gap-6 border-t px-6 py-5 md:px-10 md:py-6 lg:min-h-0 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-t-0 lg:px-8">
+      <aside className="flex shrink-0 flex-col gap-6 border-t px-6 py-5 md:px-10 md:py-6 lg:min-h-0 lg:overflow-y-auto lg:border-l lg:border-t-0 lg:px-8">
         {isHostMode ? (
           <>
             {bookingsPromise && (
               <Section
-                title="Bookings"
+                title="Upcoming bookings"
                 subtitle="Reservations guests made for this listing"
               >
                 <ListingBookings
                   bookingsPromise={bookingsPromise}
                   listingId={listing.id}
                   now={now}
-                  limit={2}
+                  limit={1}
                 />
               </Section>
             )}

@@ -34,7 +34,7 @@ export function CoverImage({
           className={cn(
             "object-cover",
             zoomOnHover &&
-              "motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-105",
+              "motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-102",
           )}
         />
       ) : (

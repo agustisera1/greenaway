@@ -8,6 +8,7 @@ export function Section({
   subtitle,
   card = false,
   cardSize = "default",
+  action,
   className,
   children,
 }: {
@@ -15,16 +16,20 @@ export function Section({
   subtitle?: ReactNode;
   card?: boolean;
   cardSize?: "default" | "sm";
+  action?: ReactNode;
   className?: string;
   children: ReactNode;
 }) {
   return (
     <div data-slot="section" className={cn("flex flex-col gap-3", className)}>
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-heading font-semibold">{title}</h2>
-        {subtitle && (
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
-        )}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-heading font-semibold">{title}</h2>
+          {subtitle && (
+            <p className="text-sm text-muted-foreground">{subtitle}</p>
+          )}
+        </div>
+        {action}
       </div>
       {card ? (
         <Card size={cardSize}>
