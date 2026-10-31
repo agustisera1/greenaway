@@ -300,7 +300,7 @@ El cableado completo (cómo agregar un evento, una cola o un processor) está en
 | Escritura en la transacción | `lib/outbox/repository.ts` (`insertOutboxEvent`), llamado desde los repos |
 | Relay y fan-out | `greenaway-worker/src/relay.ts`, `src/outbox/fan-out.ts` |
 | Queues y workers | `greenaway-worker/src/redis/queues.ts`, `src/redis/workers.ts`, `src/index.ts` |
-| Handlers | `greenaway-worker/src/processors/*`, `src/emails/*`, `src/notifications/*` |
+| Handlers | `greenaway-worker/src/emails/*`, `src/notifications/*` |
 | Config de Redis | `greenaway-worker/redis.conf`, `docker-compose.yml` |
 
 [ms-outbox]: https://microservices.io/patterns/data/transactional-outbox.html

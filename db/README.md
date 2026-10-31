@@ -137,6 +137,6 @@ una misma reserva y de su chat.
 
 ## Reset
 
-`db:reset` borra datos, no schema: `bookings`, `reviews`, `outbox` y `processed_events` en Postgres
+`db:reset` borra datos, no schema: `bookings`, `reviews` y `outbox` en Postgres
 (los `users` quedan), las colecciones de Mongo con `deleteMany` (los índices quedan) y el bucket de
 S3. Si el bucket no se puede leer (contenedor caído o bucket sin crear), S3 se saltea con un aviso.

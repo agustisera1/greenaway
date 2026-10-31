@@ -8,7 +8,7 @@ import * as readline from "readline/promises";
 
 // `users` is deliberately absent: wiping it would invalidate every logged-in
 // session and every `host_id` the seeded listings point at.
-const PG_TABLES = ["bookings", "reviews", "outbox", "processed_events"] as const;
+const PG_TABLES = ["bookings", "reviews", "outbox"] as const;
 
 // Each collection lives in its own database (see lib/*/repository.ts).
 const MONGO_COLLECTIONS = [

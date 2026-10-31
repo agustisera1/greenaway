@@ -43,6 +43,13 @@
       "when": 1791311698344,
       "tag": "0005_data_integrity_checks",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793383751285,
+      "tag": "0006_drop_processed_events",
+      "breakpoints": true
     }
   ]
 }

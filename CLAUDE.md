@@ -62,5 +62,5 @@ Un archivo por área. Las que tienen `paths:` se cargan solo al tocar archivos q
 
 - **Comentarios:** solo lo que no se deduce del código, máximo 2 líneas por bloque (lo aplica el hook
   `.claude/hooks/check-comments.mjs`).
-- **Docs:** `README.md` (qué es, cómo correrlo, limitaciones conocidas) y `db/README.md`. Una
-  limitación nueva va a "Limitaciones conocidas" del README, no a un comentario.
+- **Docs:** `README.md` (qué es, cómo correrlo), `docs/known-limitations.md` y `db/README.md`. Una
+  limitación nueva va a `docs/known-limitations.md`, no a un comentario.
