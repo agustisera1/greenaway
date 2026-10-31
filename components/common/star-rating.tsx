@@ -6,11 +6,15 @@ import { cn } from "@/lib/shared/utils";
 
 const STARS = [1, 2, 3, 4, 5];
 
+const STAR_SIZES = { sm: "size-3.5", md: "size-5" };
+
 export function StarRating({
   rating,
+  size = "sm",
   className,
 }: {
   rating: number;
+  size?: keyof typeof STAR_SIZES;
   className?: string;
 }) {
   return (
@@ -18,19 +22,23 @@ export function StarRating({
       data-slot="star-rating"
       className={cn("flex gap-0.5", className)}
       role="img"
-      aria-label={`Rated ${rating} out of 5`}
+      aria-label={`Rated ${Math.round(rating * 10) / 10} out of 5`}
     >
-      {STARS.map((star) => (
-        <Star
-          key={star}
-          className={cn(
-            "size-3.5",
-            star <= rating
-              ? "fill-rating text-rating"
-              : "fill-muted text-muted",
-          )}
-        />
-      ))}
+      {STARS.map((star) => {
+        const fill = Math.min(Math.max(rating - (star - 1), 0), 1);
+        return (
+          <span key={star} className="relative">
+            <Star className={cn(STAR_SIZES[size], "fill-muted text-muted")} />
+            {/* A runtime width can't be a Tailwind class, so the partial fill goes through `style`. */}
+            <span
+              className="absolute inset-y-0 left-0 overflow-hidden"
+              style={{ width: `${fill * 100}%` }}
+            >
+              <Star className={cn(STAR_SIZES[size], "fill-rating text-rating")} />
+            </span>
+          </span>
+        );
+      })}
     </div>
   );
 }

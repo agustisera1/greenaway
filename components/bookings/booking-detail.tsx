@@ -40,15 +40,19 @@ function PriceRow({
   );
 }
 
-// `review` is a slot: the form belongs to another feature, so the route composes them.
+// `review` and the actions are slots: they belong to other features or the route, so the route composes them.
 export function BookingDetail({
   booking,
   now,
   review,
+  stayAction,
+  statusAction,
 }: {
   booking: BookingDetailRow;
   now: Date;
   review?: ReactNode;
+  stayAction?: ReactNode;
+  statusAction?: ReactNode;
 }) {
   const stage = stayStage(booking, now.getTime());
   const status = describeStatus(booking.status ?? "pending", stage);
@@ -64,7 +68,7 @@ export function BookingDetail({
       <DetailColumns
         aside={
           <>
-            <Section title="Status" card>
+            <Section title="Status" card action={statusAction}>
               <p className="text-base font-medium">{status.headline}</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {status.detail}
@@ -99,7 +103,7 @@ export function BookingDetail({
           </>
         }
       >
-        <Section title="Your stay" card>
+        <Section title="Your stay" card action={stayAction}>
           {place && (
             <p className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground">
               <MapPin className="size-3.5 shrink-0" />

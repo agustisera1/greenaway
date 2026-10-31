@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/common/empty-state";
 import { cn } from "@/lib/shared/utils";
 import { HostBookingCard, type HostBooking } from "./host-booking-card";
-import { sortByProximity } from "./listing-bookings-model";
+import { sortByNewest, sortByProximity } from "./listing-bookings-model";
 
-// Without `limit` it's the full page: every booking, detailed, in a grid.
+// Without `limit` it's the full page: every booking, in a grid.
 export function ListingBookings({
   bookingsPromise,
   listingId,
@@ -40,24 +40,23 @@ export function ListingBookings({
     );
   }
 
-  const detailed = limit === undefined;
-  const sorted = sortByProximity(bookings, now.getTime());
-  const shown = detailed ? sorted : sorted.slice(0, limit);
+  const fullPage = limit === undefined;
+  // A preview shows the latest requests; the full page orders by stay date.
+  const sorted = fullPage
+    ? sortByProximity(bookings, now.getTime())
+    : sortByNewest(bookings);
+  const shown = fullPage ? sorted : sorted.slice(0, limit);
 
   return (
     <div className="flex flex-col gap-3">
       <ul
         className={cn(
           "grid gap-3",
-          detailed && "sm:grid-cols-2 xl:grid-cols-3",
+          fullPage && "sm:grid-cols-2 xl:grid-cols-3",
         )}
       >
         {shown.map((booking) => (
-          <HostBookingCard
-            key={booking.id}
-            booking={booking}
-            detailed={detailed}
-          />
+          <HostBookingCard key={booking.id} booking={booking} />
         ))}
       </ul>
       {shown.length < sorted.length && (
@@ -67,7 +66,7 @@ export function ListingBookings({
           nativeButton={false}
           render={<Link href={`/listings/${listingId}/bookings`} />}
         >
-          Review all reservations
+          Review all
         </Button>
       )}
     </div>

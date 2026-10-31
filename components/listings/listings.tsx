@@ -2,8 +2,9 @@ import { GetListingsQuery } from "@/lib/apollo/__generated__/operations";
 import { Card, CardContent } from "@/components/ui/card";
 import { CoverImage, OverlayBadge } from "@/components/common/cover-image";
 import { PriceLabel } from "@/components/common/price-label";
+import { StatChip } from "@/components/common/stat-chip";
 import { listingTypeGradient } from "@/lib/shared/utils";
-import { MapPin } from "lucide-react";
+import { MapPin, MessageCircle, Star } from "lucide-react";
 import Link from "next/link";
 
 export function Listings({
@@ -27,7 +28,7 @@ export function Listings({
               >
                 <OverlayBadge>{listing.type}</OverlayBadge>
               </CoverImage>
-              <CardContent className="flex flex-col gap-2 p-4">
+              <CardContent className="flex flex-1 flex-col gap-2 p-4">
                 <h3 className="line-clamp-2 text-lg font-semibold leading-snug transition-colors group-hover:text-primary">
                   {listing.title}
                 </h3>
@@ -44,7 +45,22 @@ export function Listings({
                 <p className="line-clamp-2 text-sm text-muted-foreground">
                   {listing.description}
                 </p>
-                <PriceLabel price={listing.price} className="mt-auto" />
+                <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+                  <PriceLabel price={listing.price} className="text-base whitespace-nowrap" />
+                  {listing.review_stats ? (
+                    <div className="flex shrink-0 items-center gap-1">
+                      <StatChip icon={<Star className="fill-rating text-rating" />}>
+                        {listing.review_stats.rating_avg.toFixed(1)}
+                      </StatChip>
+                      <StatChip icon={<MessageCircle />}>
+                        {listing.review_stats.count}{" "}
+                        {listing.review_stats.count === 1 ? "review" : "reviews"}
+                      </StatChip>
+                    </div>
+                  ) : (
+                    <StatChip>New</StatChip>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </Link>

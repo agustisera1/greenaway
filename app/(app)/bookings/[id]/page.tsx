@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { House, MessageSquare } from "lucide-react";
+import { Eye, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/common/back-link";
 import { PageLayout } from "@/components/common/page-layout";
@@ -49,17 +49,31 @@ export default async function BookingDetailPage({
       subtitle={subtitle}
       back={<BackLink href="/bookings">Back to bookings</BackLink>}
       actions={
-        <>
-          {listingId && (
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link href={`/listings/${listingId}`} />}
-            >
-              <House />
-              View listing
-            </Button>
-          )}
+        listingId && (
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href={`/listings/${listingId}`} />}
+          >
+            <Eye />
+            View
+          </Button>
+        )
+      }
+    >
+      <BookingDetail
+        booking={booking}
+        now={now}
+        review={isReviewable(booking, now) && <ReviewForm bookingId={id} />}
+        stayAction={
+          <CancelBookingButton
+            bookingId={id}
+            actor="guest"
+            booking={booking}
+            variant="button"
+          />
+        }
+        statusAction={
           <Button
             variant="primary"
             nativeButton={false}
@@ -68,19 +82,7 @@ export default async function BookingDetailPage({
             <MessageSquare />
             Message host
           </Button>
-          <CancelBookingButton
-            bookingId={id}
-            actor="guest"
-            booking={booking}
-            variant="button"
-          />
-        </>
-      }
-    >
-      <BookingDetail
-        booking={booking}
-        now={now}
-        review={isReviewable(booking, now) && <ReviewForm bookingId={id} />}
+        }
       />
     </PageLayout>
   );

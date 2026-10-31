@@ -41,7 +41,7 @@ export function ReviewReplyForm({
 
   if (isSubmitSuccessful) {
     return (
-      <p className="border-l border-border pl-3 text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Your reply has been submitted.
       </p>
     );
@@ -50,7 +50,7 @@ export function ReviewReplyForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-2 border-l border-border pl-3"
+      className="flex flex-col gap-2"
     >
       <Textarea
         rows={2}

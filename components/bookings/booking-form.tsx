@@ -36,7 +36,7 @@ export function BookingForm({
     control,
     register,
     handleSubmit,
-    setValue,
+    resetField,
     formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm<BookingFormValues>({
     resolver: zodResolver(staySchema),
@@ -89,9 +89,7 @@ export function BookingForm({
                 onSelect={(date) => {
                   field.onChange(date);
                   if (checkOut && date && checkOut <= date)
-                    setValue("checkOut", undefined as unknown as Date, {
-                      shouldValidate: true,
-                    });
+                    resetField("checkOut");
                   setCheckInOpen(false);
                   if (date) setCheckOutOpen(true);
                 }}

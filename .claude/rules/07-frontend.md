@@ -51,6 +51,7 @@ Cada semántico tiene su par light/dark en `:root`/`.dark`. Un color nuevo **nac
 | `ConfirmDialog` | Confirmación de acción destructiva (encapsula open + pending + retry) | Client |
 | `EmptyState` | Estado vacío centrado (icono + título + descripción + acción) | ✓ |
 | `PriceLabel` | Precio "por noche" formateado con `formatPrice` | ✓ |
+| `StatChip` | Chip de un dato compacto: ícono opcional + valor (`tabular-nums`). Ref: rating y reviews en `listings/listings.tsx` | ✓ |
 | `DatePicker` | Campo de fecha única: trigger (ícono + fecha formateada) + `Calendar` en `Popover`. `open`/`onOpenChange` opcionales para coordinar pickers hermanos | Client |
 | `BackLink` | Salida de una ruta de detalle hacia su lista (chevron + label) | ✓ |
 | `PageLayout` | Shell de página: heading grande sticky + contenido scrollable, con slots `back`/`actions`/`toolbar`. Llena el ancho de su columna. Es el borde de la ruta | ✓ |

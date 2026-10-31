@@ -6,7 +6,8 @@ import { BookingForm } from "@/components/bookings/booking-form";
 import { ListingPhotos } from "@/components/listings/listing-photos";
 import { EditListingButton } from "@/components/listings/edit-listing-button";
 import { DeleteListingButton } from "@/components/listings/delete-listing-button";
-import { ChartNoAxesColumn, MapPin, Star } from "lucide-react";
+import { ChartNoAxesColumn, MapPin } from "lucide-react";
+import { StarRating } from "@/components/common/star-rating";
 import { EmptyState } from "@/components/common/empty-state";
 import { notFound } from "next/navigation";
 import { BackLink } from "@/components/common/back-link";
@@ -90,9 +91,11 @@ export default async function ListingDetailPage({
             <span className="flex flex-col gap-2">
               <span className="flex flex-wrap items-center gap-3 text-foreground">
                 <span className="flex shrink-0 items-center gap-1.5">
-                  <Star className="size-5 fill-rating text-rating" />
+                  {listing.review_stats && (
+                    <StarRating rating={listing.review_stats.rating_avg} size="md" />
+                  )}
                   <span className="text-base font-semibold tabular-nums">
-                    {listing.rating_avg ?? "New"}
+                    {listing.review_stats?.rating_avg.toFixed(1) ?? "New"}
                   </span>
                 </span>
                 <Badge
@@ -144,19 +147,19 @@ export default async function ListingDetailPage({
         </PageLayout>
       </div>
 
-      <aside className="flex shrink-0 flex-col gap-6 border-t px-6 py-5 md:px-10 md:py-6 lg:min-h-0 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-t-0 lg:px-8">
+      <aside className="flex shrink-0 flex-col gap-6 border-t px-6 py-5 md:px-10 md:py-6 lg:min-h-0 lg:overflow-y-auto lg:border-l lg:border-t-0 lg:px-8">
         {isHostMode ? (
           <>
             {bookingsPromise && (
               <Section
-                title="Bookings"
+                title="Upcoming bookings"
                 subtitle="Reservations guests made for this listing"
               >
                 <ListingBookings
                   bookingsPromise={bookingsPromise}
                   listingId={listing.id}
                   now={now}
-                  limit={2}
+                  limit={1}
                 />
               </Section>
             )}
@@ -179,6 +182,7 @@ export default async function ListingDetailPage({
             title="Book this listing"
             subtitle={<PriceLabel price={listing.price} />}
             card
+            className="lg:w-80"
           >
             <BookingForm
               listingId={listing.id}

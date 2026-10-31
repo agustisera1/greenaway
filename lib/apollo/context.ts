@@ -1,4 +1,5 @@
 import { getListingsAvailability, getListingsBookings } from "@/lib/bookings/queries";
+import { getListingsReviewStats } from "@/lib/reviews/queries";
 import { getUserSummaries } from "@/lib/users/queries";
 import { groupedLoader, keyedLoader } from "./loaders";
 
@@ -8,6 +9,7 @@ export function createContext() {
     loaders: {
       listingBookings: groupedLoader(getListingsBookings, (booking) => booking.listing_id),
       listingAvailability: groupedLoader(getListingsAvailability, (range) => range.listing_id),
+      listingReviewStats: keyedLoader(getListingsReviewStats, (stats) => stats.listing_id),
       userSummary: keyedLoader(getUserSummaries, (user) => user.id),
     },
   };

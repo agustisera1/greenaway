@@ -19,3 +19,8 @@ export function sortByProximity<T extends Stay>(bookings: T[], now: number): T[]
     .sort((a, b) => endTime(b) - endTime(a));
   return [...upcoming, ...past];
 }
+
+export function sortByNewest<T extends { created_at: string }>(bookings: T[]): T[] {
+  const createdTime = (b: T) => parseTs(b.created_at)?.getTime() ?? 0;
+  return [...bookings].sort((a, b) => createdTime(b) - createdTime(a));
+}

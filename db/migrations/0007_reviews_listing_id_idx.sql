@@ -1,0 +1,1 @@
+CREATE INDEX "reviews_listing_id_idx" ON "reviews" USING btree ("listing_id");
