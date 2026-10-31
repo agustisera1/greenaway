@@ -8,7 +8,14 @@ type Review {
   created_at: DateTime!
 }
 
+type ReviewStats {
+  rating_avg: Float!
+  count: Int!
+}
+
 # Nullable: if the reviews fail to load, the listing still renders.
 extend type Listing {
   reviews: [Review!]
+  # Null when the listing has no reviews yet.
+  review_stats: ReviewStats
 }

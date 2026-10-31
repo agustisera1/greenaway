@@ -6,6 +6,10 @@ query GetListings($filters: FiltersInput) {
     title
     description
     photos
+    review_stats {
+      rating_avg
+      count
+    }
     location {
       address
       city

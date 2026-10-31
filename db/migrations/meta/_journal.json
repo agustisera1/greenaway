@@ -50,6 +50,13 @@
       "when": 1793383751285,
       "tag": "0006_drop_processed_events",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793462052517,
+      "tag": "0007_reviews_listing_id_idx",
+      "breakpoints": true
     }
   ]
 }

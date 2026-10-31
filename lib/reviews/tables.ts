@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, pgTable, smallint, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { check, index, pgTable, smallint, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const reviews = pgTable(
   "reviews",
@@ -13,5 +13,8 @@ export const reviews = pgTable(
     host_reply: varchar({ length: 256 }),
     created_at: timestamp({ withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [check("reviews_rating_range", sql`${table.rating} BETWEEN 1 AND 5`)],
+  (table) => [
+    check("reviews_rating_range", sql`${table.rating} BETWEEN 1 AND 5`),
+    index("reviews_listing_id_idx").on(table.listing_id),
+  ],
 );

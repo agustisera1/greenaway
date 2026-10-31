@@ -10,7 +10,10 @@ query GetListing($id: ID!) {
     }
     photos
     price
-    rating_avg
+    review_stats {
+      rating_avg
+      count
+    }
     title
     type
     availability {

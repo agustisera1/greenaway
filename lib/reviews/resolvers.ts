@@ -9,5 +9,6 @@ export const reviewsResolvers: Resolvers = {
       if (!result.ok) throw toGraphQLError(result);
       return result.data;
     },
+    review_stats: (listing, _, { loaders }) => loaders.listingReviewStats.load(listing._id),
   },
 };

@@ -6,7 +6,8 @@ import { BookingForm } from "@/components/bookings/booking-form";
 import { ListingPhotos } from "@/components/listings/listing-photos";
 import { EditListingButton } from "@/components/listings/edit-listing-button";
 import { DeleteListingButton } from "@/components/listings/delete-listing-button";
-import { ChartNoAxesColumn, MapPin, Star } from "lucide-react";
+import { ChartNoAxesColumn, MapPin } from "lucide-react";
+import { StarRating } from "@/components/common/star-rating";
 import { EmptyState } from "@/components/common/empty-state";
 import { notFound } from "next/navigation";
 import { BackLink } from "@/components/common/back-link";
@@ -90,9 +91,11 @@ export default async function ListingDetailPage({
             <span className="flex flex-col gap-2">
               <span className="flex flex-wrap items-center gap-3 text-foreground">
                 <span className="flex shrink-0 items-center gap-1.5">
-                  <Star className="size-5 fill-rating text-rating" />
+                  {listing.review_stats && (
+                    <StarRating rating={listing.review_stats.rating_avg} size="md" />
+                  )}
                   <span className="text-base font-semibold tabular-nums">
-                    {listing.rating_avg ?? "New"}
+                    {listing.review_stats?.rating_avg.toFixed(1) ?? "New"}
                   </span>
                 </span>
                 <Badge

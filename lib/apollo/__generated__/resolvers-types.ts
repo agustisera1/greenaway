@@ -126,6 +126,7 @@ export type Listing = {
   photos?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   price: Scalars['Int']['output'];
   rating_avg?: Maybe<Scalars['Float']['output']>;
+  review_stats?: Maybe<ReviewStats>;
   reviews?: Maybe<Array<Review>>;
   title: Scalars['String']['output'];
   type: Scalars['String']['output'];
@@ -216,6 +217,12 @@ export type Review = {
   id: Scalars['ID']['output'];
   listing_id: Scalars['ID']['output'];
   rating: Scalars['Int']['output'];
+};
+
+export type ReviewStats = {
+  __typename?: 'ReviewStats';
+  count: Scalars['Int']['output'];
+  rating_avg: Scalars['Float']['output'];
 };
 
 export type UserSummary = {
@@ -320,6 +327,7 @@ export type ResolversTypes = ResolversObject<{
   Notification: ResolverTypeWrapper<NotificationDocumentModel>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Review: ResolverTypeWrapper<Review>;
+  ReviewStats: ResolverTypeWrapper<ReviewStats>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   UserSummary: ResolverTypeWrapper<UserSummary>;
 }>;
@@ -346,6 +354,7 @@ export type ResolversParentTypes = ResolversObject<{
   Notification: NotificationDocumentModel;
   Query: Record<PropertyKey, never>;
   Review: Review;
+  ReviewStats: ReviewStats;
   String: Scalars['String']['output'];
   UserSummary: UserSummary;
 }>;
@@ -428,6 +437,7 @@ export type ListingResolvers<ContextType = ApolloContext, ParentType extends Res
   photos?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   price?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   rating_avg?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  review_stats?: Resolver<Maybe<ResolversTypes['ReviewStats']>, ParentType, ContextType>;
   reviews?: Resolver<Maybe<Array<ResolversTypes['Review']>>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -486,6 +496,11 @@ export type ReviewResolvers<ContextType = ApolloContext, ParentType extends Reso
   rating?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 }>;
 
+export type ReviewStatsResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['ReviewStats'] = ResolversParentTypes['ReviewStats']> = ResolversObject<{
+  count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  rating_avg?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+}>;
+
 export type UserSummaryResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['UserSummary'] = ResolversParentTypes['UserSummary']> = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -506,6 +521,7 @@ export type Resolvers<ContextType = ApolloContext> = ResolversObject<{
   Notification?: NotificationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Review?: ReviewResolvers<ContextType>;
+  ReviewStats?: ReviewStatsResolvers<ContextType>;
   UserSummary?: UserSummaryResolvers<ContextType>;
 }>;
 
