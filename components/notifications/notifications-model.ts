@@ -3,17 +3,14 @@ import {
   CalendarCheck,
   CalendarPlus,
   CalendarX,
-  CreditCard,
-  LogIn,
-  MessageSquare,
-  Star,
   type LucideIcon,
 } from "lucide-react";
 import type { GetNotificationsQuery } from "@/lib/apollo/__generated__/operations";
 
 export type Notification = NonNullable<GetNotificationsQuery["notifications"]>[number];
 
-// Notifications have no `type` field, so the icon and tint are keyed off title keywords.
+// Notifications have no `type` field, so the icon and tint are keyed off the worker's titles
+// (greenaway-worker `src/notifications/content.ts`).
 export function notificationVisual(title: string): {
   icon: LucideIcon;
   accent: string;
@@ -24,19 +21,18 @@ export function notificationVisual(title: string): {
   const destructive = "text-destructive bg-destructive/10";
   const info = "text-primary bg-primary/10";
 
+  if (t.includes("request")) return { icon: CalendarPlus, accent: info };
   if (t.includes("confirm")) return { icon: CalendarCheck, accent: success };
-  if (t.includes("check-in") || t.includes("check in"))
-    return { icon: LogIn, accent: success };
-  if (t.includes("cancel")) return { icon: CalendarX, accent: destructive };
-  if (t.includes("solicitud") || t.includes("request"))
-    return { icon: CalendarPlus, accent: info };
-  if (t.includes("pago") || t.includes("pay"))
-    return { icon: CreditCard, accent: info };
-  if (t.includes("reseña") || t.includes("review"))
-    return { icon: Star, accent: info };
-  if (t.includes("mensaje") || t.includes("message"))
-    return { icon: MessageSquare, accent: info };
+  if (t.includes("cancel") || t.includes("declin"))
+    return { icon: CalendarX, accent: destructive };
   return { icon: Bell, accent: info };
+}
+
+// Where the recipient acts on the booking: the host manages it from the listing's bookings.
+export function notificationHref(notification: Notification): string {
+  return notification.target_id === notification.host_id
+    ? `/listings/${notification.listing_id}/bookings`
+    : `/bookings/${notification.booking_id}`;
 }
 
 // The worker publishes `{ kind: "message" }` for an unread nudge (`UnreadNudge`, worker `src/redis/client.ts`).

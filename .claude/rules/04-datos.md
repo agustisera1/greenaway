@@ -64,11 +64,11 @@ Ref: [PG 11.12][pg-examine].
   Ref: [PG 5.5][pg-constraints].
 
   ```ts
-  // ❌ dos requests en paralelo pasan los dos el find
-  if (!(await repo.findClaim(eventId))) await repo.insertClaim(eventId);
+  // ❌ dos jobs en paralelo pasan los dos el find
+  if (!(await notifications.findOne({ event_id }))) await notifications.insertOne(doc);
 
-  // ✅ el insert es el chequeo: el perdedor choca contra la PK
-  await sql`INSERT INTO processed_events (event_id, consumer) VALUES (${id}, ${c}) ON CONFLICT DO NOTHING`;
+  // ✅ el insert es el chequeo: el perdedor choca contra el índice único (error 11000)
+  await notifications.insertOne({ event_id, ...doc });
   ```
 
 - **D4. El schema vive en el repo y se aplica con un comando idempotente, separado del seed.**
@@ -223,7 +223,7 @@ Ejemplos canónicos de los criterios que ya se cumplen.
 |---|---|
 | D3 `EXCLUDE` (no-solapamiento) | `db/migrations/0001_booking_no_overlap.sql` |
 | D3 `CHECK` de rango | `lib/bookings/tables.ts` (`booking_dates_ordered`, `booking_refund_range`) |
-| D3 claim por PK | `lib/outbox/tables.ts` (`processed_events`) + `greenaway-worker/src/pg/events.pg.ts` |
+| D3 claim por índice único | `event_id_unique` en `scripts/db_indexes.ts` + `greenaway-worker/src/mongo/notifications.mongo.ts` |
 | D4 migración custom (DDL y backfill) | `db/migrations/0001_booking_no_overlap.sql`, `0004_users_email_lowercase_data.sql` |
 | D4 índices de Mongo | `scripts/db_indexes.ts` |
 | D5 instantes como `Date` | `lib/chat/types.ts` ↔ `greenaway-worker/src/mongo/messages.mongo.ts` |

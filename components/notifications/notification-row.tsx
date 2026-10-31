@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/shared/utils";
 import { formatDate } from "@/lib/shared/dates";
@@ -8,7 +9,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { notificationVisual, type Notification } from "./notifications-model";
+import {
+  notificationHref,
+  notificationVisual,
+  type Notification,
+} from "./notifications-model";
 
 export function NotificationRow({
   notification,
@@ -24,7 +29,7 @@ export function NotificationRow({
   return (
     <li
       className={cn(
-        "relative flex items-start gap-4 rounded-xl border border-border p-4",
+        "relative flex items-start gap-4 rounded-xl border border-border p-4 transition-shadow hover:shadow-lg",
         !read && "bg-card",
       )}
     >
@@ -38,9 +43,13 @@ export function NotificationRow({
       </span>
 
       <div className="min-w-0 flex-1">
-        <p className="font-medium leading-snug text-pretty">
+        {/* The ::after stretches the link over the whole card; the button sits above it. */}
+        <Link
+          href={notificationHref(notification)}
+          className="block font-medium leading-snug text-pretty after:absolute after:inset-0 after:rounded-xl"
+        >
           {notification.title}
-        </p>
+        </Link>
         <p className="mt-0.5 text-sm text-muted-foreground leading-relaxed">
           {notification.body}
         </p>
@@ -55,7 +64,7 @@ export function NotificationRow({
           Read
         </span>
       ) : (
-        <div className="flex items-center gap-2">
+        <div className="relative z-10 flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger
               render={

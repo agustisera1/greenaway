@@ -1,21 +1,10 @@
-/**
- * Contrato de una fila del outbox. El service decide el `type` (es vocabulario
- * de dominio) y el repo la escribe en la misma transacción que la entidad.
- *
- * El `payload` es *thin* — sólo ids: el relay rehidrata contra la DB al
- * publicar. Meter acá lo que el mail renderiza congelaría el contrato de la cola
- * dentro de Postgres.
- *
- * Agregar un miembro a `OutboxEventType` obliga a enseñárselo al resolver de su
- * agregado en el worker (`getUserJob` / `getBookingJob`, `src/outbox/fan-out.ts`):
- * un tipo que no conoce se descarta con un log.
- */
+// Payload thin (sólo ids): el relay rehidrata al publicar. Un tipo nuevo se suma también a `EVENTS`
+// en el worker (`src/outbox/fan-out.ts`); uno que no conoce lo descarta con un log.
 export type OutboxEventType =
   | "booking.created"
   | "booking.accepted"
   | "booking.rejected"
-  | "booking.cancelled"
-  | "user.registered";
+  | "booking.cancelled";
 
 export type OutboxEvent = {
   type: OutboxEventType;

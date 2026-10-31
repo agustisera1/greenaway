@@ -2,7 +2,7 @@ import type { Transaction } from "@/lib/infra/postgres";
 import { outbox } from "./tables";
 import type { OutboxEvent } from "./types";
 
-type Aggregate = { type: "user" | "booking"; id: string };
+type Aggregate = { type: "booking"; id: string };
 
 // Takes the caller's transaction: the event lands with its entity or not at all.
 export async function insertOutboxEvent(

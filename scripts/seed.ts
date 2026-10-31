@@ -126,11 +126,16 @@ const REJECT_REASONS = [
   "I can't host a group of that size, sorry.",
 ];
 
-// Same copy the worker writes (greenaway-worker/src/notifications/booking.ts).
+// Same copy the worker writes (greenaway-worker/src/notifications/content.ts).
+type CopyNames = { guest: string; host: string; listing: string };
+type Copy = { title: string; body: (n: CopyNames) => string };
 const NOTIFICATION_COPY = {
-  created: { title: "New notification", body: (t: string) => `You have a new update related to "${t}".` },
-  update: { title: "Booking confirmed", body: (t: string) => `There's an update on your booking for "${t}".` },
-};
+  created: { title: "New booking request", body: (n) => `${n.guest} requested a stay at “${n.listing}”.` },
+  accepted: { title: "Booking confirmed", body: (n) => `${n.host} confirmed your stay at “${n.listing}”.` },
+  rejected: { title: "Booking declined", body: (n) => `${n.host} declined your request for “${n.listing}”.` },
+  cancelledByGuest: { title: "Booking cancelled", body: (n) => `${n.guest} cancelled their stay at “${n.listing}”.` },
+  cancelledByHost: { title: "Booking cancelled", body: (n) => `${n.host} cancelled your stay at “${n.listing}”.` },
+} satisfies Record<string, Copy>;
 
 // Deterministic (mulberry32): the same shape on every run, relative to today.
 let state = 20261006;
@@ -244,29 +249,44 @@ function makeBookings(listing: SeedListing, guestIds: string[]): SeedBooking[] {
 }
 
 // What the worker would have written for each transition: the party that didn't act gets it.
-function makeNotifications(booking: SeedBooking, listing: SeedListing): SeedNotification[] {
-  const notify = (recipient: string, at: Date, copy: typeof NOTIFICATION_COPY.created) => ({
+function makeNotifications(
+  booking: SeedBooking,
+  listing: SeedListing,
+  nameOf: Map<string, string>,
+): SeedNotification[] {
+  const names = {
+    guest: nameOf.get(booking.guest_id)!,
+    host: nameOf.get(listing.host_id)!,
+    listing: listing.title,
+  };
+  // The created notification predates the reason, so only the status changes carry it.
+  const note = booking.status_reason ? ` Note: “${booking.status_reason}”` : "";
+  const notify = (recipient: string, at: Date, copy: Copy, suffix = "") => ({
     _id: objectIdAt(at),
     listing_id: booking.listing_id,
     host_id: listing.host_id,
-    guest_id: recipient,
+    guest_id: booking.guest_id,
     booking_id: booking.id,
     target_id: recipient,
     title: copy.title,
-    body: copy.body(listing.title),
+    body: copy.body(names) + suffix,
     is_read: now.getTime() - at.getTime() > 3 * DAY,
   });
 
   const created = notify(listing.host_id, booking.created_at, NOTIFICATION_COPY.created);
   const answeredAt = notAfterNow(new Date(booking.created_at.getTime() + int(2, 24) * HOUR));
+  const cancelledAt = booking.cancelled_at as Date;
   switch (booking.status) {
     case "accepted":
     case "rejected":
-      return [created, notify(booking.guest_id, answeredAt, NOTIFICATION_COPY.update)];
-    case "cancelled": {
-      const counterparty = booking.cancelled_by === "guest" ? listing.host_id : booking.guest_id;
-      return [created, notify(counterparty, booking.cancelled_at as Date, NOTIFICATION_COPY.update)];
-    }
+      return [created, notify(booking.guest_id, answeredAt, NOTIFICATION_COPY[booking.status], note)];
+    case "cancelled":
+      return [
+        created,
+        booking.cancelled_by === "guest"
+          ? notify(listing.host_id, cancelledAt, NOTIFICATION_COPY.cancelledByGuest, note)
+          : notify(booking.guest_id, cancelledAt, NOTIFICATION_COPY.cancelledByHost, note),
+      ];
     default:
       return [created];
   }
@@ -339,6 +359,7 @@ async function main() {
     const idOf = new Map(seeded.map((user) => [user.email, user.id]));
     const hostIds = HOSTS.map((host) => idOf.get(host.email)!);
     const guestIds = GUESTS.map((guest) => idOf.get(guest.email)!);
+    const nameOf = new Map(people.map((user) => [idOf.get(user.email)!, user.name]));
 
     const listings = [0, 1]
       .flatMap((n) => STAYS.map((stay) => ({ stay, title: stay.titles[n] })))
@@ -347,7 +368,7 @@ async function main() {
     const listingById = new Map(listings.map((listing) => [listing._id.toHexString(), listing]));
 
     const notifications = seedBookings.flatMap((booking) =>
-      makeNotifications(booking, listingById.get(booking.listing_id)!),
+      makeNotifications(booking, listingById.get(booking.listing_id)!, nameOf),
     );
     const conversations = seedBookings
       .filter((booking) => booking.status !== "rejected" && chance(0.7))

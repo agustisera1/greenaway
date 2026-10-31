@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, jsonb, pgTable, primaryKey, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { index, jsonb, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 const timestamptz = () => timestamp({ withTimezone: true, mode: "date" });
 
@@ -18,17 +18,4 @@ export const outbox = pgTable(
   },
   // Partial over pending rows only: the table grows unbounded, the index the relay scans doesn't.
   (table) => [index("outbox_pending_idx").on(table.created_at).where(sql`published_at IS NULL`)],
-);
-
-export const processedEvents = pgTable(
-  "processed_events",
-  {
-    event_id: uuid()
-      .notNull()
-      .references(() => outbox.id, { onDelete: "cascade" }),
-    // Part of the key: one outbox row fans out to several consumers.
-    consumer: varchar({ length: 40 }).notNull(),
-    processed_at: timestamptz().notNull().defaultNow(),
-  },
-  (table) => [primaryKey({ columns: [table.event_id, table.consumer] })],
 );

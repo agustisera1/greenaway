@@ -1,37 +1,30 @@
-import {
-  Bell,
-  CalendarCheck,
-  CalendarPlus,
-  CalendarX,
-  LogIn,
-} from "lucide-react";
+import { Bell, CalendarCheck, CalendarPlus, CalendarX } from "lucide-react";
 import { describe, expect, it } from "vitest";
 import {
   isUnreadNudge,
+  notificationHref,
   notificationVisual,
   partitionByRead,
   type Notification,
 } from "./notifications-model";
 
 describe("notificationVisual", () => {
-  it("keys the icon and accent off keywords in the title", () => {
-    expect(notificationVisual("Booking confirmed")).toEqual({
-      icon: CalendarCheck,
-      accent: "text-success bg-success/10",
-    });
-    expect(notificationVisual("Reserva cancelada")).toEqual({
-      icon: CalendarX,
-      accent: "text-destructive bg-destructive/10",
-    });
-    expect(notificationVisual("Check-in reminder").icon).toBe(LogIn);
-    expect(notificationVisual("Nueva solicitud").icon).toBe(CalendarPlus);
+  const success = "text-success bg-success/10";
+  const destructive = "text-destructive bg-destructive/10";
+  const info = "text-primary bg-primary/10";
+
+  // The titles the worker writes (greenaway-worker `src/notifications/content.ts`).
+  it.each([
+    ["New booking request", CalendarPlus, info],
+    ["Booking confirmed", CalendarCheck, success],
+    ["Booking declined", CalendarX, destructive],
+    ["Booking cancelled", CalendarX, destructive],
+  ])("%s", (title, icon, accent) => {
+    expect(notificationVisual(title)).toEqual({ icon, accent });
   });
 
   it("falls back to a generic bell with the info accent", () => {
-    expect(notificationVisual("Something else")).toEqual({
-      icon: Bell,
-      accent: "text-primary bg-primary/10",
-    });
+    expect(notificationVisual("Something else")).toEqual({ icon: Bell, accent: info });
   });
 });
 
@@ -50,6 +43,16 @@ function notification(overrides: Partial<Notification>): Notification {
     ...overrides,
   };
 }
+
+describe("notificationHref", () => {
+  it("sends the host to the listing's bookings, where they act on it", () => {
+    expect(notificationHref(notification({ target_id: "h" }))).toBe("/listings/l/bookings");
+  });
+
+  it("sends the guest to their booking", () => {
+    expect(notificationHref(notification({ target_id: "g" }))).toBe("/bookings/b");
+  });
+});
 
 describe("isUnreadNudge", () => {
   it("recognises the worker's bodiless message frame", () => {

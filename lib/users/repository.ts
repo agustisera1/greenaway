@@ -1,7 +1,5 @@
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/infra/postgres";
-import { insertOutboxEvent } from "@/lib/outbox/repository";
-import type { OutboxEvent } from "@/lib/outbox/types";
 import { users } from "./tables";
 import type { NewUser, User } from "./types";
 
@@ -15,16 +13,10 @@ export async function findUsersByIds(ids: string[]): Promise<User[]> {
   return db.select().from(users).where(inArray(users.id, ids));
 }
 
-export async function insertUser(
-  user: NewUser,
-  event: OutboxEvent,
-): Promise<Pick<User, "id" | "email">> {
-  return db.transaction(async (tx) => {
-    const [created] = await tx
-      .insert(users)
-      .values(user)
-      .returning({ id: users.id, email: users.email });
-    await insertOutboxEvent(tx, { type: "user", id: created.id }, event);
-    return created;
-  });
+export async function insertUser(user: NewUser): Promise<Pick<User, "id" | "email">> {
+  const [created] = await db
+    .insert(users)
+    .values(user)
+    .returning({ id: users.id, email: users.email });
+  return created;
 }

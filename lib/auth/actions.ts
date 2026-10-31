@@ -52,7 +52,7 @@ export async function createUser(
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message, code: "VALIDATION" };
 
-  // Before bcrypt and the welcome mail: a bot burns neither CPU nor the Resend quota.
+  // Before bcrypt: a bot doesn't get to burn CPU.
   const ip = await getClientIp();
   const limit = await rateLimit(`rl:signup:ip:${ip}`, SIGNUP_IP_POLICY);
   if (!limit.allowed) return { ok: false, error: TOO_MANY_ATTEMPTS, code: "RATE_LIMITED" };
@@ -61,10 +61,7 @@ export async function createUser(
   const password_hash = await hash(password, SALT_ROUNDS);
 
   try {
-    const user = await usersRepo.insertUser(
-      { email, password_hash, name },
-      { type: "user.registered" },
-    );
+    const user = await usersRepo.insertUser({ email, password_hash, name });
     return { ok: true, data: user };
   } catch (error) {
     const code = pgErrorToCode(error);
